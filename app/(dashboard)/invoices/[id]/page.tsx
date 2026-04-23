@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import InvoicePreview from '@/components/invoices/invoice-preview'
 import { PrintButton } from '@/components/invoices/print-button'
 import { StatusActions } from './status-actions'
+import { SendEmailButton } from './send-email-button'
+import { CopyLinkButton } from './copy-link-button'
 
 type Params = Promise<{ id: string }>
 
@@ -10,9 +12,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
   const { id } = await params
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
   const [invoiceRes, itemsRes, brandingRes] = await Promise.all([
@@ -29,11 +29,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
   if (!invoiceRes.data) notFound()
 
   const invoice = invoiceRes.data
-  const rawClient = invoice.clients as {
-    name: string
-    email?: string | null
-    address?: string | null
-  } | null
+  const rawClient = invoice.clients as { name: string; email?: string | null; address?: string | null } | null
 
   const items = (itemsRes.data ?? []).map((item) => ({
     id: item.id,
@@ -56,33 +52,53 @@ export default async function InvoicePage({ params }: { params: Params }) {
     logoSignedUrl = data?.signedUrl ?? null
   }
 
+  const invoiceLabel = invoice.invoice_number ?? `#${invoice.id.slice(0, 8).toUpperCase()}`
+
   return (
     <div className="space-y-4 pb-6">
-      <div className="flex flex-wrap items-center gap-2 print:hidden">
-        <PrintButton />
-        <StatusActions invoiceId={invoice.id} currentStatus={invoice.status} />
+      {/* Toolbar */}
+      <div className="print:hidden space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-bold text-foreground">{invoiceLabel}</h1>
+          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+            invoice.status === 'paid' ? 'bg-green-100 text-green-700' :
+            invoice.status === 'sent' ? 'bg-blue-100 text-blue-700' :
+            invoice.status === 'overdue' ? 'bg-red-100 text-red-700' :
+            'bg-muted text-muted-foreground'
+          }`}>{invoice.status}</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <PrintButton />
+          <CopyLinkButton shareToken={invoice.share_token} />
+          <SendEmailButton invoiceId={invoice.id} clientEmail={rawClient?.email} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <StatusActions invoiceId={invoice.id} currentStatus={invoice.status} />
+        </div>
       </div>
+
+      {/* Preview */}
       <div className="overflow-x-auto">
-      <InvoicePreview
-        invoice={{
-          id: invoice.id,
-          amount: Number(invoice.amount),
-          tax: Number(invoice.tax),
-          total: Number(invoice.total),
-          currency: invoice.currency,
-          status: invoice.status,
-          created_at: invoice.created_at,
-          due_date: invoice.due_date ?? null,
-          notes: invoice.notes ?? null,
-          template: invoice.template ?? 'modern',
-          accent_color: invoice.accent_color ?? '#6366f1',
-        }}
-        items={items}
-        client={rawClient}
-        branding={branding}
-        logoSignedUrl={logoSignedUrl}
-        watermarkSignedUrl={watermarkSignedUrl}
-      />
+        <InvoicePreview
+          invoice={{
+            id: invoice.id,
+            amount: Number(invoice.amount),
+            tax: Number(invoice.tax),
+            total: Number(invoice.total),
+            currency: invoice.currency,
+            status: invoice.status,
+            created_at: invoice.created_at,
+            due_date: invoice.due_date ?? null,
+            notes: invoice.notes ?? null,
+            template: invoice.template ?? 'modern',
+            accent_color: invoice.accent_color ?? '#6366f1',
+          }}
+          items={items}
+          client={rawClient}
+          branding={branding}
+          logoSignedUrl={logoSignedUrl}
+          watermarkSignedUrl={watermarkSignedUrl}
+        />
       </div>
     </div>
   )

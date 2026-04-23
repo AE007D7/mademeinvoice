@@ -22,7 +22,7 @@ export default async function InvoicesPage() {
 
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('id, total, currency, status, created_at, clients(name)')
+    .select('id, invoice_number, total, currency, status, created_at, clients(name)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -65,7 +65,7 @@ export default async function InvoicesPage() {
                           {client?.name ?? '—'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(inv.created_at).toLocaleDateString()} &middot; #{inv.id.slice(0, 6).toUpperCase()}
+                          {new Date(inv.created_at).toLocaleDateString()} &middot; {inv.invoice_number ?? '#' + inv.id.slice(0, 6).toUpperCase()}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
@@ -106,7 +106,7 @@ export default async function InvoicesPage() {
                       return (
                         <tr key={inv.id} className="hover:bg-muted/40">
                           <td className="py-3 pr-4 font-mono text-xs text-muted-foreground">
-                            #{inv.id.slice(0, 8).toUpperCase()}
+                            {inv.invoice_number ?? '#' + inv.id.slice(0, 8).toUpperCase()}
                           </td>
                           <td className="py-3 pr-4 font-medium">{client?.name ?? '—'}</td>
                           <td className="py-3 pr-4 text-muted-foreground">

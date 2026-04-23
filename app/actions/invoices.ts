@@ -39,6 +39,9 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
   const taxAmount = subtotal * (input.taxRate / 100)
   const total = subtotal + taxAmount
 
+  // Get sequential invoice number atomically
+  const { data: numData } = await supabase.rpc('next_invoice_number', { p_user_id: user.id })
+
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .insert({
@@ -53,6 +56,7 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
       notes: input.notes || null,
       template: input.template ?? 'modern',
       accent_color: input.accentColor ?? '#6366f1',
+      invoice_number: numData ?? null,
     })
     .select()
     .single()
