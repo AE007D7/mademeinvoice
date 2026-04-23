@@ -2,9 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
-import { renderToStaticMarkup } from 'react-dom/server'
-import * as React from 'react'
-import { InvoiceEmail } from '@/components/emails/invoice-email'
+import { buildInvoiceEmailHtml } from '@/components/emails/invoice-email'
 
 export async function sendInvoiceEmailAction(invoiceId: string) {
   const supabase = await createClient()
@@ -45,17 +43,15 @@ export async function sendInvoiceEmailAction(invoiceId: string) {
     ? new Date(invoice.due_date + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : null
 
-  const html = renderToStaticMarkup(
-    React.createElement(InvoiceEmail, {
-      invoiceNumber: invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase(),
-      companyName,
-      clientName: client.name,
-      total: Number(invoice.total).toFixed(2),
-      currency: invoice.currency,
-      dueDate,
-      viewUrl,
-    })
-  )
+  const html = buildInvoiceEmailHtml({
+    invoiceNumber: invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase(),
+    companyName,
+    clientName: client.name,
+    total: Number(invoice.total).toFixed(2),
+    currency: invoice.currency,
+    dueDate,
+    viewUrl,
+  })
 
   const resend = new Resend(resendKey)
   const { error } = await resend.emails.send({

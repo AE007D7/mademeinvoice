@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { cancelPayPalSubscription } from '@/lib/paypal'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { redirect } from 'next/navigation'
 
 export async function cancelSubscriptionAction() {
@@ -22,9 +22,9 @@ export async function cancelSubscriptionAction() {
   }
 
   if (userData?.stripe_customer_id) {
-    const subs = await stripe.subscriptions.list({ customer: userData.stripe_customer_id, status: 'active', limit: 1 })
+    const subs = await getStripe().subscriptions.list({ customer: userData.stripe_customer_id, status: 'active', limit: 1 })
     if (subs.data[0]) {
-      await stripe.subscriptions.cancel(subs.data[0].id)
+      await getStripe().subscriptions.cancel(subs.data[0].id)
     }
     await supabase.from('users').update({ plan: 'free', subscription_ends_at: null }).eq('id', user.id)
   }
@@ -48,9 +48,9 @@ export async function deleteAccountAction() {
     await cancelPayPalSubscription(userData.paypal_sub_id).catch(() => null)
   }
   if (userData?.stripe_customer_id) {
-    const subs = await stripe.subscriptions.list({ customer: userData.stripe_customer_id, status: 'active', limit: 1 })
+    const subs = await getStripe().subscriptions.list({ customer: userData.stripe_customer_id, status: 'active', limit: 1 })
     if (subs.data[0]) {
-      await stripe.subscriptions.cancel(subs.data[0].id).catch(() => null)
+      await getStripe().subscriptions.cancel(subs.data[0].id).catch(() => null)
     }
   }
 
