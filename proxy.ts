@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
   const isAuthenticated = !!data?.claims
 
   const { pathname } = request.nextUrl
-  const protectedPaths = ['/dashboard', '/invoices', '/clients', '/settings', '/billing']
+  const protectedPaths = ['/dashboard', '/invoices', '/clients', '/settings', '/billing', '/onboarding']
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p))
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(pathname)
 
