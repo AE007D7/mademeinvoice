@@ -5,6 +5,11 @@ import { PayPalSubscribeButton } from '@/components/billing/paypal-button'
 import { CancelSubscriptionButton, DeleteAccountButton, StripeCheckoutButton } from './billing-actions'
 
 export default async function BillingPage() {
+  console.log('[BILLING DEBUG]', {
+    paypalPlanId: process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_PRO_MONTHLY,
+    paypalClientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+    hasStripe: !!process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
+  })
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
