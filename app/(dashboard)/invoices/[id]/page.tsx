@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import InvoicePreview from '@/components/invoices/invoice-preview'
@@ -6,6 +7,8 @@ import { DownloadButtons } from '@/components/invoices/download-buttons'
 import { StatusActions } from './status-actions'
 import { SendEmailButton } from './send-email-button'
 import { CopyLinkButton } from './copy-link-button'
+import { Button } from '@/components/ui/button'
+import { Pencil } from 'lucide-react'
 
 type Params = Promise<{ id: string }>
 
@@ -69,6 +72,10 @@ export default async function InvoicePage({ params }: { params: Params }) {
           }`}>{invoice.status}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" render={<Link href={`/invoices/${id}/edit`} />} className="gap-1.5">
+            <Pencil className="h-3.5 w-3.5" />
+            Edit
+          </Button>
           <PrintButton />
           <DownloadButtons invoiceLabel={invoiceLabel} />
           <CopyLinkButton shareToken={invoice.share_token} />
@@ -80,7 +87,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
       </div>
 
       {/* Preview */}
-      <div id="invoice-preview" className="overflow-x-auto">
+      <div id="invoice-preview" className="overflow-x-auto min-w-0">
         <InvoicePreview
           invoice={{
             id: invoice.id,

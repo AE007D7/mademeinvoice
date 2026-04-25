@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SlidersHorizontal, Eye } from 'lucide-react'
-import { createInvoiceAction } from '@/app/actions/invoices'
+import { createInvoiceAction, updateInvoiceAction } from '@/app/actions/invoices'
 import LineItemsTable, { type LineItem } from './line-items-table'
 import TaxSelector from './tax-selector'
 import TemplateSelector from './template-selector'
@@ -18,8 +18,20 @@ const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'INR']
 
 type Client = { id: string; name: string; email?: string | null; address?: string | null }
 type Product = { id: string; name: string; description?: string | null; price: number; unit: string }
+type InitialValues = {
+  clientId?: string
+  currency?: string
+  taxRate?: number
+  dueDate?: string
+  notes?: string
+  template?: string
+  accentColor?: string
+  items?: { id: string; description: string; quantity: number; price: number }[]
+}
 
 type Props = {
+  invoiceId?: string
+  initialValues?: InitialValues
   clients: Client[]
   products?: Product[]
   companyName?: string | null
@@ -34,19 +46,22 @@ type Props = {
   invoiceLang?: string | null
 }
 
-export default function InvoiceBuilder({ clients, products = [], companyName, logoUrl, companyPhone, companyEmail, companyWebsite, companyAddress, paymentIban, paymentRib, paymentPaypal, invoiceLang }: Props) {
+export default function InvoiceBuilder({ invoiceId, initialValues, clients, products = [], companyName, logoUrl, companyPhone, companyEmail, companyWebsite, companyAddress, paymentIban, paymentRib, paymentPaypal, invoiceLang }: Props) {
   const router = useRouter()
+  const isEditing = !!invoiceId
 
-  const [clientId, setClientId] = useState('')
-  const [currency, setCurrency] = useState('USD')
-  const [taxRate, setTaxRate] = useState(0)
-  const [dueDate, setDueDate] = useState('')
-  const [notes, setNotes] = useState('')
-  const [items, setItems] = useState<LineItem[]>([
-    { id: crypto.randomUUID(), description: '', quantity: 1, price: 0 },
-  ])
-  const [template, setTemplate] = useState<TemplateId>('modern')
-  const [accentColor, setAccentColor] = useState('#6366f1')
+  const [clientId, setClientId] = useState(initialValues?.clientId ?? '')
+  const [currency, setCurrency] = useState(initialValues?.currency ?? 'USD')
+  const [taxRate, setTaxRate] = useState(initialValues?.taxRate ?? 0)
+  const [dueDate, setDueDate] = useState(initialValues?.dueDate ?? '')
+  const [notes, setNotes] = useState(initialValues?.notes ?? '')
+  const [items, setItems] = useState<LineItem[]>(
+    initialValues?.items?.length
+      ? initialValues.items
+      : [{ id: crypto.randomUUID(), description: '', quantity: 1, price: 0 }]
+  )
+  const [template, setTemplate] = useState<TemplateId>((initialValues?.template ?? 'modern') as TemplateId)
+  const [accentColor, setAccentColor] = useState(initialValues?.accentColor ?? '#6366f1')
   const [mobileTab, setMobileTab] = useState<'details' | 'preview'>('details')
   const [error, setError] = useState('')
   const [isPending, setIsPending] = useState(false)
@@ -66,7 +81,7 @@ export default function InvoiceBuilder({ clients, products = [], companyName, lo
     e.preventDefault()
     setError('')
     setIsPending(true)
-    const result = await createInvoiceAction({
+    const payload = {
       clientId: clientId || null,
       currency,
       taxRate,
@@ -75,7 +90,10 @@ export default function InvoiceBuilder({ clients, products = [], companyName, lo
       template,
       accentColor,
       items: items.map(({ description, quantity, price }) => ({ description, quantity, price })),
-    })
+    }
+    const result = isEditing
+      ? await updateInvoiceAction({ ...payload, invoiceId: invoiceId! })
+      : await createInvoiceAction(payload)
     if (result?.error) {
       setError(result.error)
       setIsPending(false)
@@ -206,9 +224,9 @@ export default function InvoiceBuilder({ clients, products = [], companyName, lo
           disabled={isPending}
           className="flex-1 gradient-primary border-0 text-white shadow-md shadow-primary/30 hover:opacity-90 transition-opacity"
         >
-          {isPending ? 'Saving…' : 'Save Invoice'}
+          {isPending ? 'Saving…' : isEditing ? 'Update Invoice' : 'Save Invoice'}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.push('/invoices')} disabled={isPending}>
+        <Button type="button" variant="outline" onClick={() => router.push(isEditing ? `/invoices/${invoiceId}` : '/invoices')} disabled={isPending}>
           Cancel
         </Button>
       </div>
@@ -217,7 +235,7 @@ export default function InvoiceBuilder({ clients, products = [], companyName, lo
 
   const previewPanel = (
     <div className="h-full overflow-y-auto p-4 sm:p-6">
-      <div className="mx-auto max-w-2xl overflow-hidden rounded-xl shadow-xl shadow-black/10 ring-1 ring-border">
+      <div className="mx-auto w-[794px] max-w-full overflow-hidden rounded-xl shadow-xl shadow-black/10 ring-1 ring-border">
         <TemplateRenderer templateId={template} data={templateData} />
       </div>
     </div>
@@ -284,7 +302,7 @@ export default function InvoiceBuilder({ clients, products = [], companyName, lo
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="mx-auto max-w-2xl overflow-hidden rounded-xl shadow-xl shadow-black/10 ring-1 ring-border">
+          <div className="mx-auto w-[794px] max-w-full overflow-hidden rounded-xl shadow-xl shadow-black/10 ring-1 ring-border">
             <TemplateRenderer templateId={template} data={templateData} />
           </div>
         </div>

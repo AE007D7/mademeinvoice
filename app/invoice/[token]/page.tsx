@@ -100,8 +100,8 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
       </div>
 
       {/* Invoice */}
-      <div className="mx-auto max-w-3xl overflow-x-auto p-4 sm:p-8">
-        <div id="invoice-preview" className="invoice-print-area relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-border print:max-w-none print:rounded-none print:shadow-none print:ring-0">
+      <div className="overflow-x-auto p-4 sm:p-8">
+        <div id="invoice-preview" className="invoice-print-area relative mx-auto w-[794px] max-w-full overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-border print:w-full print:max-w-none print:rounded-none print:shadow-none print:ring-0">
           {watermarkSignedUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={watermarkSignedUrl} alt="" className="invoice-watermark pointer-events-none select-none" />

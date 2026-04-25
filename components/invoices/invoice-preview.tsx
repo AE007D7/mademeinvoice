@@ -94,7 +94,7 @@ export default function InvoicePreview({ invoice, items, client, branding, logoS
   const templateId = (invoice.template ?? 'modern') as TemplateId
 
   return (
-    <div className="invoice-print-area relative mx-auto max-w-3xl overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-border print:max-w-none print:rounded-none print:shadow-none print:ring-0">
+    <div className="invoice-print-area relative mx-auto w-[794px] max-w-full overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-border print:w-full print:max-w-none print:rounded-none print:shadow-none print:ring-0">
       {/* Watermark */}
       {watermarkSignedUrl && (
         // eslint-disable-next-line @next/next/no-img-element

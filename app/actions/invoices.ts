@@ -80,6 +80,52 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
   redirect(`/invoices/${invoice.id}`)
 }
 
+export type UpdateInvoiceInput = CreateInvoiceInput & { invoiceId: string }
+
+export async function updateInvoiceAction(input: UpdateInvoiceInput) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const subtotal = input.items.reduce((sum, item) => sum + item.quantity * item.price, 0)
+  const taxAmount = subtotal * (input.taxRate / 100)
+  const total = subtotal + taxAmount
+
+  const { error: invoiceError } = await supabase
+    .from('invoices')
+    .update({
+      client_id: input.clientId || null,
+      amount: subtotal,
+      tax: input.taxRate,
+      total,
+      currency: input.currency,
+      due_date: input.dueDate || null,
+      notes: input.notes || null,
+      template: input.template ?? 'modern',
+      accent_color: input.accentColor ?? '#6366f1',
+    })
+    .eq('id', input.invoiceId)
+    .eq('user_id', user.id)
+
+  if (invoiceError) return { error: invoiceError.message }
+
+  await supabase.from('invoice_items').delete().eq('invoice_id', input.invoiceId)
+
+  if (input.items.length > 0) {
+    const { error: itemsError } = await supabase.from('invoice_items').insert(
+      input.items.map((item) => ({
+        invoice_id: input.invoiceId,
+        description: item.description,
+        quantity: item.quantity,
+        price: item.price,
+      }))
+    )
+    if (itemsError) return { error: itemsError.message }
+  }
+
+  redirect(`/invoices/${input.invoiceId}`)
+}
+
 export async function updateInvoiceStatus(invoiceId: string, status: string) {
   const supabase = await createClient()
 
