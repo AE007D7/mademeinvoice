@@ -298,6 +298,49 @@ const TEMPLATES: {
       </svg>
     ),
   },
+  {
+    id: 'letterhead',
+    name: 'Letterhead',
+    preview: (
+      <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+        <rect width="120" height="160" fill="white" />
+        {/* Letterhead image placeholder */}
+        <rect width="120" height="42" fill="#f1f5f9" />
+        <rect x="8" y="8" width="50" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="8" y="17" width="36" height="3" rx="1" fill="#e2e8f0" />
+        <rect x="8" y="23" width="28" height="2.5" rx="1" fill="#e2e8f0" />
+        <rect x="76" y="10" width="36" height="20" rx="3" fill="#e2e8f0" />
+        {/* Image icon in placeholder */}
+        <circle cx="94" cy="20" r="5" fill="#cbd5e1" />
+        <rect x="8" y="34" width="104" height="0.5" fill="#94a3b8" opacity="0.5" />
+        {/* Invoice number line */}
+        <rect x="8" y="48" width="30" height="4" rx="1" fill="#334155" />
+        <rect x="82" y="49" width="30" height="2.5" rx="1" fill="#cbd5e1" />
+        <rect x="8" y="56" width="104" height="0.5" fill="#e2e8f0" />
+        {/* Bill to */}
+        <rect x="8" y="62" width="14" height="2" rx="1" fill="#94a3b8" />
+        <rect x="8" y="67" width="32" height="3" rx="1" fill="#334155" />
+        <rect x="8" y="73" width="24" height="2.5" rx="1" fill="#cbd5e1" />
+        <rect x="8" y="80" width="104" height="0.5" fill="#e2e8f0" />
+        {/* Table header */}
+        <rect x="8" y="86" width="52" height="2" rx="1" fill="#94a3b8" />
+        <rect x="96" y="86" width="16" height="2" rx="1" fill="#94a3b8" />
+        <rect x="8" y="91" width="104" height="1" fill="#334155" opacity="0.6" />
+        {/* Clean rows */}
+        {[0, 1, 2].map(i => (
+          <g key={i}>
+            <rect x="8" y={96 + i * 9} width="48" height="2.5" rx="1" fill="#e2e8f0" />
+            <rect x="96" y={96 + i * 9} width="16" height="2.5" rx="1" fill="#cbd5e1" />
+            <rect x="8" y={101 + i * 9} width="104" height="0.5" fill="#f1f5f9" />
+          </g>
+        ))}
+        {/* Total */}
+        <rect x="74" y="130" width="38" height="0.5" fill="#334155" opacity="0.6" />
+        <rect x="74" y="134" width="20" height="3" rx="1" fill="#334155" />
+        <rect x="96" y="133" width="16" height="5" rx="1" fill="#334155" />
+      </svg>
+    ),
+  },
 ]
 
 type Props = {

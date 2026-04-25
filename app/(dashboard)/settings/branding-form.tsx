@@ -14,6 +14,7 @@ type Branding = {
   company_name?: string | null
   logo_url?: string | null
   watermark_url?: string | null
+  letterhead_url?: string | null
   phone?: string | null
   email?: string | null
   website?: string | null
@@ -45,6 +46,7 @@ export default function BrandingForm({ branding, userId }: Props) {
   const [uiLang, setUiLang] = useState<LangCode>((branding?.ui_language as LangCode) ?? 'en')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [watermarkFile, setWatermarkFile] = useState<File | null>(null)
+  const [letterheadFile, setLetterheadFile] = useState<File | null>(null)
   const [isPending, setIsPending] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -68,6 +70,7 @@ export default function BrandingForm({ branding, userId }: Props) {
     const supabase = createClient()
     let logoUrl = branding?.logo_url ?? null
     let watermarkUrl = branding?.watermark_url ?? null
+    let letterheadUrl = branding?.letterhead_url ?? null
 
     if (logoFile) {
       const path = await uploadFile('logos', logoFile)
@@ -89,6 +92,16 @@ export default function BrandingForm({ branding, userId }: Props) {
       watermarkUrl = path
     }
 
+    if (letterheadFile) {
+      const path = await uploadFile('letterheads', letterheadFile)
+      if (!path) {
+        setError('Failed to upload letterhead.')
+        setIsPending(false)
+        return
+      }
+      letterheadUrl = path
+    }
+
     const { error } = await supabase.from('branding').upsert(
       {
         user_id: userId,
@@ -104,6 +117,7 @@ export default function BrandingForm({ branding, userId }: Props) {
         ui_language: uiLang,
         logo_url: logoUrl,
         watermark_url: watermarkUrl,
+        letterhead_url: letterheadUrl,
       },
       { onConflict: 'user_id' }
     )
@@ -288,6 +302,25 @@ export default function BrandingForm({ branding, userId }: Props) {
             )}
             <p className="text-xs text-muted-foreground">
               The watermark will appear faintly behind invoice content.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="letterhead">Letterhead</Label>
+            <Input
+              id="letterhead"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setLetterheadFile(e.target.files?.[0] ?? null)}
+              disabled={isPending}
+            />
+            {branding?.letterhead_url && (
+              <p className="text-xs text-muted-foreground">
+                Letterhead currently set. Upload a new file to replace it.
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Used by the Letterhead template. Upload your designed header (PNG/JPG). Your invoice data will appear below it.
             </p>
           </div>
 

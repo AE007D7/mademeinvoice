@@ -48,9 +48,10 @@ type Props = {
   branding: Branding
   logoSignedUrl?: string | null
   watermarkSignedUrl?: string | null
+  letterheadSignedUrl?: string | null
 }
 
-export default function InvoicePreview({ invoice, items, client, branding, logoSignedUrl, watermarkSignedUrl }: Props) {
+export default function InvoicePreview({ invoice, items, client, branding, logoSignedUrl, watermarkSignedUrl, letterheadSignedUrl }: Props) {
   const subtotal = items.reduce((s, i) => s + i.quantity * i.price, 0)
   const taxAmount = subtotal * (Number(invoice.tax) / 100)
 
@@ -74,6 +75,7 @@ export default function InvoicePreview({ invoice, items, client, branding, logoS
     paymentRib: branding?.rib ?? undefined,
     paymentPaypal: branding?.paypal ?? undefined,
     lang: branding?.invoice_language ?? 'en',
+    letterheadUrl: letterheadSignedUrl ?? undefined,
     invoiceNumber: invoice.id.slice(0, 8).toUpperCase(),
     issueDate,
     dueDate,

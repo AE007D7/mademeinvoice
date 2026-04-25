@@ -20,7 +20,7 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
 
   const [itemsRes, brandingRes] = await Promise.all([
     supabase.from('invoice_items').select('*').eq('invoice_id', invoice.id).order('id'),
-    supabase.from('branding').select('company_name, logo_url, watermark_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', invoice.user_id).single(),
+    supabase.from('branding').select('company_name, logo_url, watermark_url, letterhead_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', invoice.user_id).single(),
   ])
 
   const branding = brandingRes.data ?? null
@@ -43,6 +43,12 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
     watermarkSignedUrl = data?.signedUrl ?? null
   }
 
+  let letterheadSignedUrl: string | null = null
+  if (branding?.letterhead_url) {
+    const { data } = await supabase.storage.from('letterheads').createSignedUrl(branding.letterhead_url, 3600)
+    letterheadSignedUrl = data?.signedUrl ?? null
+  }
+
   const client = invoice.clients as { name: string; email?: string | null; address?: string | null } | null
   const subtotal = items.reduce((s, i) => s + i.quantity * i.price, 0)
   const taxAmount = subtotal * (Number(invoice.tax) / 100)
@@ -63,6 +69,7 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
     paymentRib: branding?.rib ?? undefined,
     paymentPaypal: branding?.paypal ?? undefined,
     lang: branding?.invoice_language ?? 'en',
+    letterheadUrl: letterheadSignedUrl ?? undefined,
     invoiceNumber: invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase(),
     issueDate,
     dueDate,

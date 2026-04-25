@@ -22,6 +22,7 @@ type Props = {
   clients: Client[]
   companyName?: string | null
   logoUrl?: string | null
+  letterheadUrl?: string | null
   companyPhone?: string | null
   companyEmail?: string | null
   companyWebsite?: string | null
@@ -32,7 +33,7 @@ type Props = {
   invoiceLang?: string | null
 }
 
-export default function InvoiceBuilder({ clients, companyName, logoUrl, companyPhone, companyEmail, companyWebsite, companyAddress, paymentIban, paymentRib, paymentPaypal, invoiceLang }: Props) {
+export default function InvoiceBuilder({ clients, companyName, logoUrl, letterheadUrl, companyPhone, companyEmail, companyWebsite, companyAddress, paymentIban, paymentRib, paymentPaypal, invoiceLang }: Props) {
   const router = useRouter()
 
   const [clientId, setClientId] = useState('')
@@ -82,6 +83,7 @@ export default function InvoiceBuilder({ clients, companyName, logoUrl, companyP
   const templateData = {
     companyName: companyName ?? 'Made Me Invoice',
     logoUrl,
+    letterheadUrl,
     companyPhone: companyPhone ?? undefined,
     companyEmail: companyEmail ?? undefined,
     companyWebsite: companyWebsite ?? undefined,
