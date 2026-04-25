@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Trash2, Plus, BookOpen, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
 
 export type LineItem = {
   id: string
@@ -27,6 +26,9 @@ function newItem(): LineItem {
 
 export default function LineItemsTable({ items, onChange, products = [] }: Props) {
   const [showCatalog, setShowCatalog] = useState(false)
+  // Keep raw string values so typing feels natural (e.g. clearing "1" to type "12")
+  const [rawQty, setRawQty] = useState<Record<string, string>>({})
+  const [rawPrice, setRawPrice] = useState<Record<string, string>>({})
 
   function addRow() {
     onChange([...items, newItem()])
@@ -44,93 +46,99 @@ export default function LineItemsTable({ items, onChange, products = [] }: Props
 
   function removeRow(id: string) {
     onChange(items.filter((i) => i.id !== id))
+    setRawQty(r => { const n = { ...r }; delete n[id]; return n })
+    setRawPrice(r => { const n = { ...r }; delete n[id]; return n })
   }
 
-  function update(id: string, field: keyof LineItem, value: string | number) {
-    onChange(items.map((i) => (i.id === id ? { ...i, [field]: value } : i)))
+  function updateDesc(id: string, value: string) {
+    onChange(items.map((i) => (i.id === id ? { ...i, description: value } : i)))
+  }
+
+  function updateQty(id: string, raw: string) {
+    setRawQty(r => ({ ...r, [id]: raw }))
+    const n = parseFloat(raw)
+    if (!isNaN(n) && n >= 0) onChange(items.map(i => i.id === id ? { ...i, quantity: n } : i))
+  }
+
+  function updatePrice(id: string, raw: string) {
+    setRawPrice(r => ({ ...r, [id]: raw }))
+    const n = parseFloat(raw)
+    if (!isNaN(n) && n >= 0) onChange(items.map(i => i.id === id ? { ...i, price: n } : i))
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.quantity * i.price, 0)
 
   return (
-    <div className="space-y-2">
-      {/* Header */}
-      <div className="hidden grid-cols-[1fr_80px_100px_80px_32px] gap-2 text-xs font-medium text-muted-foreground sm:grid">
-        <span>Description</span>
-        <span className="text-right">Qty</span>
-        <span className="text-right">Price</span>
-        <span className="text-right">Total</span>
-        <span />
-      </div>
+    <div className="space-y-3">
+      {/* Column headers */}
+      {items.length > 0 && (
+        <div className="grid grid-cols-[1fr_72px_88px_72px_28px] gap-2 text-xs font-medium text-muted-foreground px-1">
+          <span>Description</span>
+          <span className="text-center">Qty</span>
+          <span className="text-center">Price</span>
+          <span className="text-right">Total</span>
+          <span />
+        </div>
+      )}
 
       {/* Rows */}
       <div className="space-y-2">
         {items.map((item) => (
-          <div
-            key={item.id}
-            className={cn(
-              'grid gap-2',
-              'grid-cols-1 sm:grid-cols-[1fr_80px_100px_80px_32px]'
-            )}
-          >
+          <div key={item.id} className="grid grid-cols-[1fr_72px_88px_72px_28px] gap-2 items-center">
             <Input
               placeholder="Item description"
               value={item.description}
-              onChange={(e) => update(item.id, 'description', e.target.value)}
+              onChange={(e) => updateDesc(item.id, e.target.value)}
+              className="h-9 text-sm"
             />
             <Input
               type="number"
               min="0"
-              step="0.01"
+              step="any"
               placeholder="1"
-              value={item.quantity}
-              onChange={(e) =>
-                update(item.id, 'quantity', parseFloat(e.target.value) || 0)
-              }
-              className="text-right"
+              value={rawQty[item.id] ?? item.quantity}
+              onChange={(e) => updateQty(item.id, e.target.value)}
+              onBlur={() => setRawQty(r => { const n = { ...r }; delete n[item.id]; return n })}
+              className="h-9 text-center text-sm px-1"
             />
             <Input
               type="number"
               min="0"
-              step="0.01"
+              step="any"
               placeholder="0.00"
-              value={item.price}
-              onChange={(e) =>
-                update(item.id, 'price', parseFloat(e.target.value) || 0)
-              }
-              className="text-right"
+              value={rawPrice[item.id] ?? item.price}
+              onChange={(e) => updatePrice(item.id, e.target.value)}
+              onBlur={() => setRawPrice(r => { const n = { ...r }; delete n[item.id]; return n })}
+              className="h-9 text-right text-sm px-2"
             />
-            <div className="flex items-center justify-end text-sm font-medium">
+            <div className="text-right text-sm font-semibold text-foreground tabular-nums">
               ${(item.quantity * item.price).toFixed(2)}
             </div>
-            <Button
+            <button
               type="button"
-              variant="ghost"
-              size="icon-sm"
               onClick={() => removeRow(item.id)}
               aria-label="Remove item"
-              className="text-muted-foreground hover:text-destructive"
+              className="flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
             >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
           </div>
         ))}
       </div>
 
-      {/* Add row / catalog */}
+      {/* Add / catalog buttons */}
       <div className="relative flex gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={addRow} className="gap-1.5">
+        <Button type="button" variant="outline" size="sm" onClick={addRow} className="gap-1.5 h-8 text-xs">
           <Plus className="h-3.5 w-3.5" />
           Add item
         </Button>
         {products.length > 0 && (
-          <Button type="button" variant="outline" size="sm" onClick={() => setShowCatalog(v => !v)} className="gap-1.5">
+          <Button type="button" variant="outline" size="sm" onClick={() => setShowCatalog(v => !v)} className="gap-1.5 h-8 text-xs">
             <BookOpen className="h-3.5 w-3.5" />
             From catalog
           </Button>
         )}
 
-        {/* Catalog dropdown */}
         {showCatalog && (
           <div className="absolute left-0 top-9 z-20 w-72 rounded-xl border border-border bg-card shadow-xl shadow-black/10">
             <div className="flex items-center justify-between border-b border-border px-3 py-2">
@@ -145,13 +153,15 @@ export default function LineItemsTable({ items, onChange, products = [] }: Props
                   key={p.id}
                   type="button"
                   onClick={() => addFromProduct(p)}
-                  className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm hover:bg-muted/60 transition-colors"
+                  className="flex w-full items-center justify-between px-3 py-2.5 text-left hover:bg-muted/60 transition-colors"
                 >
-                  <div>
-                    <p className="font-medium text-foreground">{p.name}</p>
-                    {p.description && <p className="text-xs text-muted-foreground truncate max-w-[160px]">{p.description}</p>}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{p.name}</p>
+                    {p.description && (
+                      <p className="text-xs text-muted-foreground truncate max-w-[160px]">{p.description}</p>
+                    )}
                   </div>
-                  <span className="ml-3 shrink-0 font-semibold text-foreground">${Number(p.price).toFixed(2)}</span>
+                  <span className="ml-3 shrink-0 text-sm font-semibold text-foreground">${Number(p.price).toFixed(2)}</span>
                 </button>
               ))}
             </div>
@@ -160,7 +170,7 @@ export default function LineItemsTable({ items, onChange, products = [] }: Props
       </div>
 
       {/* Subtotal */}
-      <div className="flex justify-end border-t border-border pt-2 text-sm font-semibold">
+      <div className="flex justify-end border-t border-border pt-2 text-sm font-semibold tabular-nums">
         Subtotal: ${subtotal.toFixed(2)}
       </div>
     </div>
