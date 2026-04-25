@@ -5,9 +5,10 @@ export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request })
   const supabase = createClient(request, response)
 
-  // getClaims() verifies JWT locally — no network call, correct for proxy
-  const { data } = await supabase.auth.getClaims()
-  const isAuthenticated = !!data?.claims
+  // getUser() validates with Supabase and silently refreshes expiring tokens,
+  // writing the updated cookie back via the setAll handler in lib/supabase/proxy.ts
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAuthenticated = !!user
 
   const { pathname } = request.nextUrl
   const protectedPaths = ['/dashboard', '/invoices', '/clients', '/settings', '/billing', '/onboarding']
