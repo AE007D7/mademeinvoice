@@ -13,10 +13,59 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const APP_URL = "https://mademeinvoice.com";
+const TITLE = "Made Me Invoice — Free Invoice Generator | Print & Send in Seconds";
+const DESCRIPTION =
+  "Create professional invoices online in seconds. Print-ready PDFs, instant email delivery, custom branding, multi-currency & global tax support. Free for freelancers and small businesses.";
+
 export const metadata: Metadata = {
-  title: "Made Me Invoice — Professional Invoicing for Freelancers",
-  description:
-    "Create, send, and track professional invoices. Global tax support, custom branding, multi-currency. 7-day free trial.",
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: TITLE,
+    template: "%s | Made Me Invoice",
+  },
+  description: DESCRIPTION,
+  keywords: [
+    "invoice generator",
+    "free invoice maker",
+    "online invoicing",
+    "print invoice",
+    "send invoice online",
+    "fast invoice creator",
+    "professional invoice",
+    "freelancer invoice",
+    "invoice PDF",
+    "invoice template",
+    "small business invoicing",
+    "invoice for freelancers",
+    "create invoice online",
+    "invoice ready to print",
+    "invoice ready to send",
+  ],
+  authors: [{ name: "Made Me Invoice" }],
+  creator: "Made Me Invoice",
+  publisher: "Made Me Invoice",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: APP_URL,
+    siteName: "Made Me Invoice",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Made Me Invoice — Professional Invoicing" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
