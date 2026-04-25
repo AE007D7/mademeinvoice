@@ -12,7 +12,7 @@ export function RevenueChart({ data }: { data: MonthData[] }) {
         <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} width={48} />
         <Tooltip
-          formatter={(v: number) => [`$${v.toFixed(2)}`, 'Revenue']}
+          formatter={(v: unknown) => [`$${Number(v).toFixed(2)}`, 'Revenue']}
           contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
           cursor={{ fill: 'hsl(var(--muted))', opacity: 0.4 }}
         />
