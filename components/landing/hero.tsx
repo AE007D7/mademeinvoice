@@ -115,7 +115,7 @@ export default function Hero() {
           <div className="space-y-7">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
-              7-day free trial · No credit card required
+              1-day free trial · No credit card required
             </div>
 
             <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-white md:text-5xl lg:text-6xl">
@@ -151,13 +151,19 @@ export default function Hero() {
             {/* Social proof */}
             <div className="flex items-center gap-3 text-sm text-white/40">
               <div className="flex -space-x-2">
-                {['A', 'B', 'C', 'D'].map((l) => (
-                  <div
-                    key={l}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[oklch(0.11_0.04_265)] gradient-primary text-[10px] font-bold text-white"
-                  >
-                    {l}
-                  </div>
+                {[
+                  'https://i.pravatar.cc/56?img=47',
+                  'https://i.pravatar.cc/56?img=32',
+                  'https://i.pravatar.cc/56?img=11',
+                  'https://i.pravatar.cc/56?img=25',
+                ].map((src, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={src}
+                    alt="user avatar"
+                    className="h-7 w-7 rounded-full border-2 border-[oklch(0.11_0.04_265)] object-cover"
+                  />
                 ))}
               </div>
               <span>Trusted by 2,000+ freelancers</span>

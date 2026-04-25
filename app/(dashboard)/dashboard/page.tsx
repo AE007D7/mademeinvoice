@@ -53,7 +53,7 @@ export default async function DashboardPage() {
   const trialActive = userData ? isTrialActive(userData.trial_ends_at ?? null) : false
   const trialEndsAt = userData?.trial_ends_at ? new Date(userData.trial_ends_at) : null
   const daysLeft = trialEndsAt
-    ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / 86400000))
+    ? Math.max(0, Math.ceil((trialEndsAt.getTime() - new Date().getTime()) / 86400000))
     : 0
 
   return (

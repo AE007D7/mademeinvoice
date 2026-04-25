@@ -23,7 +23,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
       .eq('user_id', user.id)
       .single(),
     supabase.from('invoice_items').select('*').eq('invoice_id', id).order('id'),
-    supabase.from('branding').select('company_name, logo_url, watermark_url, letterhead_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', user.id).single(),
+    supabase.from('branding').select('company_name, logo_url, watermark_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', user.id).single(),
   ])
 
   if (!invoiceRes.data) notFound()
@@ -50,12 +50,6 @@ export default async function InvoicePage({ params }: { params: Params }) {
   if (branding?.logo_url) {
     const { data } = await supabase.storage.from('logos').createSignedUrl(branding.logo_url, 3600)
     logoSignedUrl = data?.signedUrl ?? null
-  }
-
-  let letterheadSignedUrl: string | null = null
-  if (branding?.letterhead_url) {
-    const { data } = await supabase.storage.from('letterheads').createSignedUrl(branding.letterhead_url, 3600)
-    letterheadSignedUrl = data?.signedUrl ?? null
   }
 
   const invoiceLabel = invoice.invoice_number ?? `#${invoice.id.slice(0, 8).toUpperCase()}`
@@ -104,7 +98,6 @@ export default async function InvoicePage({ params }: { params: Params }) {
           branding={branding}
           logoSignedUrl={logoSignedUrl}
           watermarkSignedUrl={watermarkSignedUrl}
-          letterheadSignedUrl={letterheadSignedUrl}
         />
       </div>
     </div>

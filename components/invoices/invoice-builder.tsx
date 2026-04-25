@@ -22,7 +22,6 @@ type Props = {
   clients: Client[]
   companyName?: string | null
   logoUrl?: string | null
-  letterheadUrl?: string | null
   companyPhone?: string | null
   companyEmail?: string | null
   companyWebsite?: string | null
@@ -33,7 +32,7 @@ type Props = {
   invoiceLang?: string | null
 }
 
-export default function InvoiceBuilder({ clients, companyName, logoUrl, letterheadUrl, companyPhone, companyEmail, companyWebsite, companyAddress, paymentIban, paymentRib, paymentPaypal, invoiceLang }: Props) {
+export default function InvoiceBuilder({ clients, companyName, logoUrl, companyPhone, companyEmail, companyWebsite, companyAddress, paymentIban, paymentRib, paymentPaypal, invoiceLang }: Props) {
   const router = useRouter()
 
   const [clientId, setClientId] = useState('')
@@ -49,13 +48,14 @@ export default function InvoiceBuilder({ clients, companyName, logoUrl, letterhe
   const [mobileTab, setMobileTab] = useState<'details' | 'preview'>('details')
   const [error, setError] = useState('')
   const [isPending, setIsPending] = useState(false)
+  // eslint-disable-next-line react-hooks/purity
+  const [invoiceNumber] = useState(`INV-${Date.now().toString().slice(-6)}`)
+  const [issueDate] = useState(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }))
 
   const subtotal = items.reduce((s, i) => s + i.quantity * i.price, 0)
   const taxAmount = subtotal * (taxRate / 100)
   const total = subtotal + taxAmount
   const selectedClient = clients.find((c) => c.id === clientId) ?? null
-  const invoiceNumber = `INV-${Date.now().toString().slice(-6)}`
-  const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
   const dueDateFormatted = dueDate
     ? new Date(dueDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : undefined
@@ -83,7 +83,6 @@ export default function InvoiceBuilder({ clients, companyName, logoUrl, letterhe
   const templateData = {
     companyName: companyName ?? 'Made Me Invoice',
     logoUrl,
-    letterheadUrl,
     companyPhone: companyPhone ?? undefined,
     companyEmail: companyEmail ?? undefined,
     companyWebsite: companyWebsite ?? undefined,

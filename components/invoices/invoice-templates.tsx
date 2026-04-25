@@ -1,7 +1,7 @@
 import { Phone, Mail, Globe, MapPin, Building2, Wallet, CreditCard } from 'lucide-react'
 import { getInvoiceT } from '@/lib/i18n'
 
-export type TemplateId = 'classic' | 'modern' | 'minimal' | 'bold' | 'stripe' | 'ruled' | 'corporate' | 'letterhead'
+export type TemplateId = 'classic' | 'modern' | 'minimal' | 'bold' | 'stripe' | 'ruled' | 'corporate'
 
 export type TemplateData = {
   companyName: string
@@ -29,7 +29,6 @@ export type TemplateData = {
   paymentRib?: string | null
   paymentPaypal?: string | null
   lang?: string | null
-  letterheadUrl?: string | null
 }
 
 // ─── shared helpers ───────────────────────────────────────────────────────────
@@ -778,114 +777,6 @@ export function CorporateTemplate(d: TemplateData) {
 }
 
 // ─────────────────────────────────────────────
-// Letterhead template
-// ─────────────────────────────────────────────
-export function LetterheadTemplate(d: TemplateData) {
-  const t = getInvoiceT(d.lang)
-  const fmt = (n: number) =>
-    new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
-
-  return (
-    <div dir={t.dir} className="bg-white text-gray-900 font-sans min-h-[1056px] flex flex-col">
-      {/* Letterhead image header */}
-      {d.letterheadUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={d.letterheadUrl} alt="letterhead" className="w-full object-contain" />
-      ) : (
-        <div className="w-full h-32 flex items-center justify-center border-b-2 border-dashed border-gray-300 bg-gray-50">
-          <p className="text-sm text-gray-400">Upload your letterhead in Settings → Letterhead</p>
-        </div>
-      )}
-
-      {/* Invoice body — just data lines */}
-      <div className="flex-1 px-10 py-8 space-y-6">
-        {/* Invoice meta row */}
-        <div className="flex items-start justify-between gap-6 border-b border-gray-200 pb-6">
-          <div>
-            <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{t.invoice}</p>
-            <p className="text-2xl font-bold text-gray-900">{d.invoiceNumber}</p>
-          </div>
-          <div className="text-right space-y-1 text-sm">
-            <p className="text-gray-500">{t.issueDate}: <span className="font-medium text-gray-800">{d.issueDate}</span></p>
-            {d.dueDate && <p className="text-gray-500">{t.dueDate}: <span className="font-medium text-gray-800">{d.dueDate}</span></p>}
-          </div>
-        </div>
-
-        {/* Bill To */}
-        {d.clientName && (
-          <div className="border-b border-gray-200 pb-6">
-            <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">{t.billTo}</p>
-            <p className="font-semibold text-gray-900">{d.clientName}</p>
-            {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
-            {d.clientAddress && <p className="text-sm text-gray-500 whitespace-pre-line">{d.clientAddress}</p>}
-          </div>
-        )}
-
-        {/* Line items — clean rows only */}
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b-2 border-gray-900">
-              <th className="py-2 text-left text-xs uppercase tracking-widest text-gray-500 font-medium">{t.description}</th>
-              <th className="py-2 text-right text-xs uppercase tracking-widest text-gray-500 font-medium w-16">{t.qty}</th>
-              <th className="py-2 text-right text-xs uppercase tracking-widest text-gray-500 font-medium w-24">{t.price}</th>
-              <th className="py-2 text-right text-xs uppercase tracking-widest text-gray-500 font-medium w-24">{t.lineTotal}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {d.items.map((item, i) => (
-              <tr key={item.id ?? i} className="border-b border-gray-100">
-                <td className="py-3 text-gray-800">{item.description || '—'}</td>
-                <td className="py-3 text-right text-gray-600">{item.quantity}</td>
-                <td className="py-3 text-right text-gray-600">{d.currency} {fmt(item.price)}</td>
-                <td className="py-3 text-right text-gray-800 font-medium">{d.currency} {fmt(item.quantity * item.price)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Totals */}
-        <div className="flex justify-end">
-          <div className="w-56 space-y-2 text-sm">
-            <div className="flex justify-between text-gray-500">
-              <span>{t.subtotal}</span>
-              <span>{d.currency} {fmt(d.subtotal)}</span>
-            </div>
-            {d.taxRate > 0 && (
-              <div className="flex justify-between text-gray-500">
-                <span>{t.tax} {d.taxRate}%</span>
-                <span>{d.currency} {fmt(d.taxAmount)}</span>
-              </div>
-            )}
-            <div className="flex justify-between border-t-2 border-gray-900 pt-2 font-bold text-base text-gray-900">
-              <span>{t.amountDue}</span>
-              <span>{d.currency} {fmt(d.total)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Notes */}
-        {d.notes && (
-          <div className="border-t border-gray-200 pt-4 text-sm text-gray-600">
-            <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{t.notes}</p>
-            <p className="whitespace-pre-line">{d.notes}</p>
-          </div>
-        )}
-
-        {/* Payment info */}
-        {(d.paymentIban || d.paymentRib || d.paymentPaypal) && (
-          <div className="border-t border-gray-200 pt-4 text-sm text-gray-600 space-y-1">
-            <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">{t.paymentDetails}</p>
-            {d.paymentIban && <p>IBAN: <span className="font-mono">{d.paymentIban}</span></p>}
-            {d.paymentRib && <p>RIB: <span className="font-mono">{d.paymentRib}</span></p>}
-            {d.paymentPaypal && <p>PayPal: {d.paymentPaypal}</p>}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────
 // Renderer
 // ─────────────────────────────────────────────
 export function TemplateRenderer({ templateId, data }: { templateId: TemplateId; data: TemplateData }) {
@@ -897,7 +788,6 @@ export function TemplateRenderer({ templateId, data }: { templateId: TemplateId;
     case 'stripe':      return <StripeTemplate     {...data} />
     case 'ruled':       return <RuledTemplate      {...data} />
     case 'corporate':   return <CorporateTemplate  {...data} />
-    case 'letterhead':  return <LetterheadTemplate {...data} />
     default:            return <ModernTemplate     {...data} />
   }
 }

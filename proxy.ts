@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/proxy'
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request })
+  const response = NextResponse.next({ request })
   const supabase = createClient(request, response)
 
   // getClaims() verifies JWT locally — no network call, correct for proxy

@@ -47,7 +47,7 @@ const features = [
     icon: Zap,
     title: 'Free Trial',
     description:
-      'Full Pro access for 7 days, no credit card required. Upgrade when you\'re ready.',
+      'Full Pro access for 1 day, no credit card required. Upgrade when you\'re ready.',
     color: 'bg-amber-500',
   },
 ]

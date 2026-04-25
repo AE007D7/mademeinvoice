@@ -12,6 +12,8 @@ import { GoogleButton } from '@/components/auth/google-button'
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [businessName, setBusinessName] = useState('')
+  const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
   const [isPending, setIsPending] = useState(false)
   const [sent, setSent] = useState(false)
@@ -27,6 +29,10 @@ export default function SignupPage() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          company_name: businessName.trim() || null,
+          phone: phone.trim() || null,
+        },
       },
     })
 
@@ -54,7 +60,7 @@ export default function SignupPage() {
             <h1 className="text-2xl font-bold text-foreground">Check your email</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               We sent a confirmation link to <strong className="text-foreground">{email}</strong>.
-              <br />Click it to activate your 7-day free trial.
+              <br />Click it to activate your 1-day free trial.
             </p>
           </div>
         </div>
@@ -82,7 +88,7 @@ export default function SignupPage() {
           <div className="mb-7">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Start your <span className="font-semibold text-primary">7-day free trial</span> — no credit card required
+              Start your <span className="font-semibold text-primary">1-day free trial</span> — no credit card required
             </p>
           </div>
 
@@ -98,6 +104,30 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="businessName">Business Name</Label>
+              <Input
+                id="businessName"
+                type="text"
+                placeholder="Acme Inc."
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                required
+                disabled={isPending}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+1 555 000 0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                disabled={isPending}
+              />
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
