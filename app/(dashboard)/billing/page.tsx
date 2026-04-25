@@ -26,7 +26,8 @@ export default async function BillingPage() {
   const extraCredits = userData?.extra_credits ?? 0
   const hasSub = !!(userData?.paypal_sub_id || userData?.stripe_customer_id)
 
-  const paypalPlanId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_PRO ?? ''
+  const paypalPlanId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_PRO_MONTHLY ?? ''
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? ''
   const stripePricePro = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO ?? ''
   const stripeTopupPrice = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TOPUP ?? ''
 
@@ -77,7 +78,7 @@ export default async function BillingPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">Pro</p>
-                  <p className="text-xs text-muted-foreground">$19 / month</p>
+                  <p className="text-xs text-muted-foreground">$9.99 / month</p>
                 </div>
                 <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-white">Popular</span>
               </div>
@@ -97,10 +98,10 @@ export default async function BillingPage() {
                     mode="subscription"
                   />
                 )}
-                {paypalPlanId && (
-                  <PayPalSubscribeButton planId={paypalPlanId} userId={user.id} />
+                {paypalPlanId && paypalClientId && (
+                  <PayPalSubscribeButton planId={paypalPlanId} clientId={paypalClientId} />
                 )}
-                {!stripePricePro && !paypalPlanId && (
+                {!stripePricePro && (!paypalPlanId || !paypalClientId) && (
                   <p className="text-xs text-muted-foreground">Payment not configured yet.</p>
                 )}
               </div>
