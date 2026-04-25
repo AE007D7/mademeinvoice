@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { TemplateRenderer, type TemplateId, type TemplateData } from '@/components/invoices/invoice-templates'
 import { PrintButton } from '@/components/invoices/print-button'
+import { DownloadButtons } from '@/components/invoices/download-buttons'
 import { FileText } from 'lucide-react'
 
 type Params = Promise<{ token: string }>
@@ -91,13 +92,16 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
             </div>
             <span className="text-sm font-semibold text-foreground">Made Me Invoice</span>
           </div>
-          <PrintButton />
+          <div className="flex items-center gap-2">
+            <PrintButton />
+            <DownloadButtons invoiceLabel={invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase()} />
+          </div>
         </div>
       </div>
 
       {/* Invoice */}
       <div className="mx-auto max-w-3xl overflow-x-auto p-4 sm:p-8">
-        <div className="invoice-print-area relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-border print:max-w-none print:rounded-none print:shadow-none print:ring-0">
+        <div id="invoice-preview" className="invoice-print-area relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-border print:max-w-none print:rounded-none print:shadow-none print:ring-0">
           {watermarkSignedUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={watermarkSignedUrl} alt="" className="invoice-watermark pointer-events-none select-none" />
