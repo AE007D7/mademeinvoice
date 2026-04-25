@@ -6,9 +6,10 @@ export default async function NewInvoicePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const [clientsRes, brandingRes] = await Promise.all([
+  const [clientsRes, brandingRes, productsRes] = await Promise.all([
     supabase.from('clients').select('id, name, email, address').eq('user_id', user.id).order('name'),
     supabase.from('branding').select('company_name, logo_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', user.id).single(),
+    supabase.from('products').select('id, name, description, price, unit').eq('user_id', user.id).order('name'),
   ])
 
   const branding = brandingRes.data ?? null
@@ -28,6 +29,7 @@ export default async function NewInvoicePage() {
       <div className="lg:min-h-0 lg:flex-1">
         <InvoiceBuilder
           clients={clientsRes.data ?? []}
+          products={productsRes.data ?? []}
           companyName={branding?.company_name}
           logoUrl={logoSignedUrl}
           companyPhone={branding?.phone}

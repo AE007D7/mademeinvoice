@@ -98,7 +98,7 @@ export function getInvoiceT(lang?: string | null): InvoiceT {
 // ─── UI translations ──────────────────────────────────────────────────────────
 
 export type UiT = {
-  nav: { dashboard: string; invoices: string; clients: string; settings: string; billing: string; logout: string }
+  nav: { dashboard: string; invoices: string; clients: string; products: string; analytics: string; settings: string; billing: string; logout: string }
   invoices: {
     title: string; newInvoice: string; allInvoices: string
     noInvoices: string; createFirst: string
@@ -121,7 +121,7 @@ export type UiT = {
 
 export const UI_T: Record<LangCode, UiT> = {
   en: {
-    nav: { dashboard: 'Dashboard', invoices: 'Invoices', clients: 'Clients', settings: 'Settings', billing: 'Billing', logout: 'Log out' },
+    nav: { dashboard: 'Dashboard', invoices: 'Invoices', clients: 'Clients', products: 'Products', analytics: 'Analytics', settings: 'Settings', billing: 'Billing', logout: 'Log out' },
     invoices: {
       title: 'Invoices', newInvoice: 'New Invoice', allInvoices: 'All Invoices',
       noInvoices: 'No invoices yet.', createFirst: 'Create your first invoice',
@@ -143,7 +143,7 @@ export const UI_T: Record<LangCode, UiT> = {
     common: { view: 'View', cancel: 'Cancel', save: 'Save', saving: 'Saving…', error: 'An error occurred.', loading: 'Loading…' },
   },
   fr: {
-    nav: { dashboard: 'Tableau de bord', invoices: 'Factures', clients: 'Clients', settings: 'Paramètres', billing: 'Facturation', logout: 'Déconnexion' },
+    nav: { dashboard: 'Tableau de bord', invoices: 'Factures', clients: 'Clients', products: 'Produits', analytics: 'Analytique', settings: 'Paramètres', billing: 'Facturation', logout: 'Déconnexion' },
     invoices: {
       title: 'Factures', newInvoice: 'Nouvelle facture', allInvoices: 'Toutes les factures',
       noInvoices: 'Aucune facture.', createFirst: 'Créer votre première facture',
@@ -165,7 +165,7 @@ export const UI_T: Record<LangCode, UiT> = {
     common: { view: 'Voir', cancel: 'Annuler', save: 'Enregistrer', saving: 'Enregistrement…', error: 'Une erreur est survenue.', loading: 'Chargement…' },
   },
   es: {
-    nav: { dashboard: 'Panel', invoices: 'Facturas', clients: 'Clientes', settings: 'Ajustes', billing: 'Facturación', logout: 'Cerrar sesión' },
+    nav: { dashboard: 'Panel', invoices: 'Facturas', clients: 'Clientes', products: 'Productos', analytics: 'Analíticas', settings: 'Ajustes', billing: 'Facturación', logout: 'Cerrar sesión' },
     invoices: {
       title: 'Facturas', newInvoice: 'Nueva factura', allInvoices: 'Todas las facturas',
       noInvoices: 'Sin facturas.', createFirst: 'Crea tu primera factura',
@@ -187,7 +187,7 @@ export const UI_T: Record<LangCode, UiT> = {
     common: { view: 'Ver', cancel: 'Cancelar', save: 'Guardar', saving: 'Guardando…', error: 'Ocurrió un error.', loading: 'Cargando…' },
   },
   de: {
-    nav: { dashboard: 'Dashboard', invoices: 'Rechnungen', clients: 'Kunden', settings: 'Einstellungen', billing: 'Abrechnung', logout: 'Abmelden' },
+    nav: { dashboard: 'Dashboard', invoices: 'Rechnungen', clients: 'Kunden', products: 'Produkte', analytics: 'Analytik', settings: 'Einstellungen', billing: 'Abrechnung', logout: 'Abmelden' },
     invoices: {
       title: 'Rechnungen', newInvoice: 'Neue Rechnung', allInvoices: 'Alle Rechnungen',
       noInvoices: 'Noch keine Rechnungen.', createFirst: 'Erste Rechnung erstellen',
@@ -209,7 +209,7 @@ export const UI_T: Record<LangCode, UiT> = {
     common: { view: 'Ansehen', cancel: 'Abbrechen', save: 'Speichern', saving: 'Speichern…', error: 'Ein Fehler ist aufgetreten.', loading: 'Laden…' },
   },
   ar: {
-    nav: { dashboard: 'لوحة التحكم', invoices: 'الفواتير', clients: 'العملاء', settings: 'الإعدادات', billing: 'الفوترة', logout: 'تسجيل الخروج' },
+    nav: { dashboard: 'لوحة التحكم', invoices: 'الفواتير', clients: 'العملاء', products: 'المنتجات', analytics: 'التحليلات', settings: 'الإعدادات', billing: 'الفوترة', logout: 'تسجيل الخروج' },
     invoices: {
       title: 'الفواتير', newInvoice: 'فاتورة جديدة', allInvoices: 'جميع الفواتير',
       noInvoices: 'لا توجد فواتير بعد.', createFirst: 'أنشئ فاتورتك الأولى',
@@ -231,7 +231,7 @@ export const UI_T: Record<LangCode, UiT> = {
     common: { view: 'عرض', cancel: 'إلغاء', save: 'حفظ', saving: 'جارٍ الحفظ…', error: 'حدث خطأ.', loading: 'تحميل…' },
   },
   pt: {
-    nav: { dashboard: 'Painel', invoices: 'Faturas', clients: 'Clientes', settings: 'Configurações', billing: 'Faturamento', logout: 'Sair' },
+    nav: { dashboard: 'Painel', invoices: 'Faturas', clients: 'Clientes', products: 'Produtos', analytics: 'Análises', settings: 'Configurações', billing: 'Faturamento', logout: 'Sair' },
     invoices: {
       title: 'Faturas', newInvoice: 'Nova fatura', allInvoices: 'Todas as faturas',
       noInvoices: 'Nenhuma fatura ainda.', createFirst: 'Crie sua primeira fatura',
@@ -253,7 +253,7 @@ export const UI_T: Record<LangCode, UiT> = {
     common: { view: 'Ver', cancel: 'Cancelar', save: 'Salvar', saving: 'Salvando…', error: 'Ocorreu um erro.', loading: 'Carregando…' },
   },
   it: {
-    nav: { dashboard: 'Dashboard', invoices: 'Fatture', clients: 'Clienti', settings: 'Impostazioni', billing: 'Abbonamento', logout: 'Esci' },
+    nav: { dashboard: 'Dashboard', invoices: 'Fatture', clients: 'Clienti', products: 'Prodotti', analytics: 'Analisi', settings: 'Impostazioni', billing: 'Abbonamento', logout: 'Esci' },
     invoices: {
       title: 'Fatture', newInvoice: 'Nuova fattura', allInvoices: 'Tutte le fatture',
       noInvoices: 'Nessuna fattura.', createFirst: 'Crea la tua prima fattura',

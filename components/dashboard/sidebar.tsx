@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   FileText,
   Users,
+  Package,
+  BarChart2,
   Settings,
   CreditCard,
   LogOut,
@@ -55,6 +57,8 @@ export default function Sidebar({ t }: { t: UiT['nav'] }) {
     { href: '/dashboard', label: t.dashboard, icon: LayoutDashboard },
     { href: '/invoices', label: t.invoices, icon: FileText },
     { href: '/clients', label: t.clients, icon: Users },
+    { href: '/products', label: t.products, icon: Package },
+    { href: '/analytics', label: t.analytics, icon: BarChart2 },
     { href: '/settings', label: t.settings, icon: Settings },
     { href: '/billing', label: t.billing, icon: CreditCard },
   ]

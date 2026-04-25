@@ -17,9 +17,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'INR']
 
 type Client = { id: string; name: string; email?: string | null; address?: string | null }
+type Product = { id: string; name: string; description?: string | null; price: number; unit: string }
 
 type Props = {
   clients: Client[]
+  products?: Product[]
   companyName?: string | null
   logoUrl?: string | null
   companyPhone?: string | null
@@ -32,7 +34,7 @@ type Props = {
   invoiceLang?: string | null
 }
 
-export default function InvoiceBuilder({ clients, companyName, logoUrl, companyPhone, companyEmail, companyWebsite, companyAddress, paymentIban, paymentRib, paymentPaypal, invoiceLang }: Props) {
+export default function InvoiceBuilder({ clients, products = [], companyName, logoUrl, companyPhone, companyEmail, companyWebsite, companyAddress, paymentIban, paymentRib, paymentPaypal, invoiceLang }: Props) {
   const router = useRouter()
 
   const [clientId, setClientId] = useState('')
@@ -155,7 +157,7 @@ export default function InvoiceBuilder({ clients, companyName, logoUrl, companyP
           <CardTitle className="text-sm">Line Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <LineItemsTable items={items} onChange={setItems} />
+          <LineItemsTable items={items} onChange={setItems} products={products} />
         </CardContent>
       </Card>
 

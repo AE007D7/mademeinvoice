@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import InvoicePreview from '@/components/invoices/invoice-preview'
 import { PrintButton } from '@/components/invoices/print-button'
+import { DownloadButtons } from '@/components/invoices/download-buttons'
 import { StatusActions } from './status-actions'
 import { SendEmailButton } from './send-email-button'
 import { CopyLinkButton } from './copy-link-button'
@@ -69,6 +70,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <PrintButton />
+          <DownloadButtons invoiceLabel={invoiceLabel} />
           <CopyLinkButton shareToken={invoice.share_token} />
           <SendEmailButton invoiceId={invoice.id} clientEmail={rawClient?.email} />
         </div>
@@ -78,7 +80,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
       </div>
 
       {/* Preview */}
-      <div className="overflow-x-auto">
+      <div id="invoice-preview" className="overflow-x-auto">
         <InvoicePreview
           invoice={{
             id: invoice.id,
