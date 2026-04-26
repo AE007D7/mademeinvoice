@@ -19,7 +19,7 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   }
 
   async function captureCanvas(el: HTMLElement): Promise<HTMLCanvasElement> {
-    const { default: html2canvas } = await import('html2canvas')
+    const { default: html2canvas } = await import('html2canvas-pro')
 
     // Temporarily force the element to full A4 width.
     // We only touch width/max/min — not margin — so mx-auto still centers
