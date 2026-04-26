@@ -1,54 +1,64 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { Send, Check } from 'lucide-react'
-import { sendInvoiceEmailAction } from '@/app/actions/email'
+import { Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-export function SendEmailButton({ invoiceId, clientEmail }: { invoiceId: string; clientEmail?: string | null }) {
-  const [isPending, startTransition] = useTransition()
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState('')
-  const router = useRouter()
+type Props = {
+  shareToken?: string | null
+  clientEmail?: string | null
+  clientName?: string | null
+  invoiceNumber: string
+  invoiceTotal: number
+  invoiceCurrency: string
+  companyName: string
+}
 
-  if (!clientEmail) {
-    return (
-      <p className="text-xs text-muted-foreground">
-        No client email — <a href="/clients" className="underline underline-offset-2">add one</a> to send by email.
-      </p>
+export function SendEmailButton({
+  shareToken,
+  clientEmail,
+  clientName,
+  invoiceNumber,
+  invoiceTotal,
+  invoiceCurrency,
+  companyName,
+}: Props) {
+  function handleClick() {
+    // 1. Trigger the PDF download so the user has the file ready to attach.
+    const pdfBtn = document.querySelector('[data-pdf-download]') as HTMLButtonElement | null
+    if (pdfBtn && !pdfBtn.disabled) pdfBtn.click()
+
+    // 2. Build the public (no-auth) invoice link from the share token.
+    const publicUrl = shareToken
+      ? `${window.location.origin}/invoice/${shareToken}`
+      : window.location.href
+
+    // 3. Build a French email body — encodeURIComponent handles all special chars.
+    const name    = clientName ?? ''
+    const total   = invoiceTotal.toFixed(2)
+    const subject = encodeURIComponent(`Facture ${invoiceNumber} - ${companyName}`)
+    const body    = encodeURIComponent(
+      `Bonjour ${name},\n\n` +
+      `Veuillez trouver ci-joint la facture ${invoiceNumber} d'un montant de ${total} ${invoiceCurrency}.\n\n` +
+      `Vous pouvez consulter et télécharger la facture ici :\n${publicUrl}\n\n` +
+      `N'hésitez pas à me contacter pour toute question.\n\n` +
+      `Cordialement,\n${companyName}`
     )
-  }
+    const to = clientEmail ? encodeURIComponent(clientEmail) : ''
 
-  function handleSend() {
-    setError('')
-    startTransition(async () => {
-      const result = await sendInvoiceEmailAction(invoiceId)
-      if (result?.error) {
-        setError(result.error)
-      } else {
-        setSent(true)
-        router.refresh()
-      }
-    })
-  }
-
-  if (sent) {
-    return (
-      <div className="flex items-center gap-1.5 text-sm text-green-600">
-        <Check className="h-4 w-4" />
-        Sent to {clientEmail}
-      </div>
-    )
+    // 4. Open the user's default email client.
+    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <Button variant="outline" onClick={handleSend} disabled={isPending} className="gap-2">
-        <Send className="h-4 w-4" />
-        {isPending ? 'Sending…' : `Send to ${clientEmail}`}
+    <div className="flex flex-col gap-1.5">
+      <Button variant="outline" size="sm" onClick={handleClick} className="gap-1.5">
+        <Mail className="h-3.5 w-3.5" />
+        Envoyer par email
       </Button>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      <p className="text-xs text-muted-foreground max-w-xs leading-snug">
+        Votre client email s&apos;ouvrira avec le message pré-rempli. Le PDF sera
+        téléchargé — vous pourrez le joindre si besoin.
+      </p>
     </div>
   )
 }

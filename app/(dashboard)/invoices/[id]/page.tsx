@@ -79,7 +79,15 @@ export default async function InvoicePage({ params }: { params: Params }) {
           <PrintButton />
           <DownloadButtons invoiceLabel={invoiceLabel} />
           <CopyLinkButton shareToken={invoice.share_token} />
-          <SendEmailButton invoiceId={invoice.id} clientEmail={rawClient?.email} />
+          <SendEmailButton
+            shareToken={invoice.share_token}
+            clientEmail={rawClient?.email}
+            clientName={rawClient?.name}
+            invoiceNumber={invoiceLabel}
+            invoiceTotal={Number(invoice.total)}
+            invoiceCurrency={invoice.currency}
+            companyName={branding?.company_name ?? 'Made Me Invoice'}
+          />
         </div>
         <div className="flex flex-wrap gap-2">
           <StatusActions invoiceId={invoice.id} currentStatus={invoice.status} />

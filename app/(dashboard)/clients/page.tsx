@@ -62,9 +62,14 @@ export default async function ClientsPage() {
                       <td className="py-3 pr-4 text-muted-foreground">{client.email ?? '—'}</td>
                       <td className="py-3 pr-4 text-muted-foreground">{client.address ?? '—'}</td>
                       <td className="py-3 text-right">
-                        <Button variant="ghost" size="sm" render={<Link href={`/invoices/new?clientId=${client.id}`} />}>
-                          Invoice
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="sm" render={<Link href={`/clients/${client.id}/edit`} />}>
+                            Edit
+                          </Button>
+                          <Button variant="ghost" size="sm" render={<Link href={`/invoices/new?clientId=${client.id}`} />}>
+                            Invoice
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

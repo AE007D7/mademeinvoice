@@ -122,7 +122,7 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
           <ImageIcon className="h-3.5 w-3.5" />
           {loadingJpeg ? 'Saving…' : 'Save JPEG'}
         </Button>
-        <Button variant="outline" size="sm" onClick={downloadPdf} disabled={loadingPdf} className="gap-1.5">
+        <Button data-pdf-download variant="outline" size="sm" onClick={downloadPdf} disabled={loadingPdf} className="gap-1.5">
           <FileDown className="h-3.5 w-3.5" />
           {loadingPdf ? 'Saving…' : 'Save PDF'}
         </Button>
