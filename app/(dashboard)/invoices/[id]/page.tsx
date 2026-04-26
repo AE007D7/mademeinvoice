@@ -91,6 +91,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
         <InvoicePreview
           invoice={{
             id: invoice.id,
+            invoice_number: invoice.invoice_number ?? null,
             amount: Number(invoice.amount),
             tax: Number(invoice.tax),
             total: Number(invoice.total),

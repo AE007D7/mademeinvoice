@@ -15,6 +15,7 @@ type Client = {
 
 type Invoice = {
   id: string
+  invoice_number?: string | null
   amount: number
   tax: number
   total: number
@@ -74,7 +75,7 @@ export default function InvoicePreview({ invoice, items, client, branding, logoS
     paymentRib: branding?.rib ?? undefined,
     paymentPaypal: branding?.paypal ?? undefined,
     lang: branding?.invoice_language ?? 'en',
-    invoiceNumber: invoice.id.slice(0, 8).toUpperCase(),
+    invoiceNumber: invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase(),
     issueDate,
     dueDate,
     notes: invoice.notes,

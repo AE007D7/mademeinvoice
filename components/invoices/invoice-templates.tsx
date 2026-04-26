@@ -107,7 +107,7 @@ function ContactFooter({ d }: { d: TemplateData }) {
 export function ClassicTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
-    <div className="min-h-full bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
+    <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       <div className="px-12 pt-12 pb-4">
         <div className="flex items-start justify-between">
           <div>
@@ -204,7 +204,7 @@ export function ClassicTemplate(d: TemplateData) {
 export function ModernTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
-    <div className="min-h-full bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
+    <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       <div className="px-12 py-8" style={{ background: d.accentColor }}>
         <div className="flex items-center justify-between">
           <div>
@@ -293,7 +293,7 @@ export function ModernTemplate(d: TemplateData) {
 export function MinimalTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
-    <div className="min-h-full bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
+    <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       <div className="px-12 pt-12">
         <div className="flex items-start justify-between">
           <div>
@@ -377,7 +377,7 @@ export function MinimalTemplate(d: TemplateData) {
 export function BoldTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
-    <div className="min-h-full bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
+    <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       <div className="relative overflow-hidden px-12 py-10" style={{ background: d.accentColor }}>
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative flex items-end justify-between">
@@ -472,7 +472,7 @@ export function BoldTemplate(d: TemplateData) {
 export function StripeTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
-    <div className="min-h-full flex bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
+    <div className="min-h-[1123px] flex bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       {/* Left stripe */}
       <div className="w-3 shrink-0" style={{ background: d.accentColor }} />
 
@@ -571,7 +571,7 @@ export function StripeTemplate(d: TemplateData) {
 export function RuledTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
-    <div className="min-h-full bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
+    <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       {/* Top accent bar */}
       <div className="h-1.5 w-full" style={{ background: d.accentColor }} />
 
@@ -679,7 +679,7 @@ export function RuledTemplate(d: TemplateData) {
 export function CorporateTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
-    <div className="min-h-full bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
+    <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       {/* Header band */}
       <div className="px-10 py-7" style={{ background: d.accentColor }}>
         <div className="flex items-center justify-between">
