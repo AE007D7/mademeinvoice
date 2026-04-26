@@ -32,7 +32,11 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
   const limit = await checkInvoiceLimit(supabase, user.id)
   if (!limit.allowed) return { error: limit.reason }
 
-  const subtotal = input.items.reduce(
+  const items = input.items.filter(
+    (i) => i.description.trim() !== '' || i.price > 0
+  )
+
+  const subtotal = items.reduce(
     (sum, item) => sum + item.quantity * item.price,
     0
   )
@@ -65,9 +69,9 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
     return { error: invoiceError?.message ?? 'Failed to create invoice.' }
   }
 
-  if (input.items.length > 0) {
+  if (items.length > 0) {
     const { error: itemsError } = await supabase.from('invoice_items').insert(
-      input.items.map((item) => ({
+      items.map((item) => ({
         invoice_id: invoice.id,
         description: item.description,
         quantity: item.quantity,
@@ -87,7 +91,11 @@ export async function updateInvoiceAction(input: UpdateInvoiceInput) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
-  const subtotal = input.items.reduce((sum, item) => sum + item.quantity * item.price, 0)
+  const items = input.items.filter(
+    (i) => i.description.trim() !== '' || i.price > 0
+  )
+
+  const subtotal = items.reduce((sum, item) => sum + item.quantity * item.price, 0)
   const taxAmount = subtotal * (input.taxRate / 100)
   const total = subtotal + taxAmount
 
@@ -111,9 +119,9 @@ export async function updateInvoiceAction(input: UpdateInvoiceInput) {
 
   await supabase.from('invoice_items').delete().eq('invoice_id', input.invoiceId)
 
-  if (input.items.length > 0) {
+  if (items.length > 0) {
     const { error: itemsError } = await supabase.from('invoice_items').insert(
-      input.items.map((item) => ({
+      items.map((item) => ({
         invoice_id: input.invoiceId,
         description: item.description,
         quantity: item.quantity,

@@ -4,9 +4,8 @@ import { useState } from 'react'
 import { ImageIcon, FileDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const A4_WIDTH_PX  = 794
-const A4_HEIGHT_PX = 1123   // A4 at 96 dpi
-const PIXEL_RATIO  = 2
+const A4_WIDTH_PX = 794
+const PIXEL_RATIO = 2
 
 export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   const [loadingJpeg, setLoadingJpeg] = useState(false)
@@ -21,53 +20,61 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   }
 
   /**
-   * Clone the invoice HTML into a clean off-screen proxy div.
+   * Capture the invoice element as a JPEG data-URL.
    *
-   * We deliberately avoid capturing the live `.invoice-print-area` wrapper
-   * because its `mx-auto` margin and `ring-1` / `shadow-sm` decorations can
-   * shift the canvas origin inside html-to-image's SVG foreignObject context,
-   * producing blank left-side space (content appears to the right).
+   * We capture the live `.invoice-print-area` element directly so that all
+   * CSS positioning contexts (absolute children, overflow-hidden clipping) are
+   * preserved exactly as they appear on screen.
    *
-   * The proxy sits at `left: -9999px` so it is rendered by the browser (layout
-   * is live) but completely invisible.  All Tailwind classes resolve correctly
-   * because the proxy is still part of the same document and stylesheet.
+   * Before capture we override the wrapper's decorative inline styles — the
+   * `mx-auto` margin and `ring`/`shadow`/`rounded-xl` classes — because these
+   * can skew html-to-image's SVG-foreignObject canvas boundary, producing
+   * blank left-side space.  All overrides are restored after capture.
    */
-  async function buildProxy(el: HTMLElement): Promise<HTMLElement> {
-    const proxy = document.createElement('div')
-    proxy.style.cssText = [
-      'position:absolute',
-      'top:0',
-      'left:-9999px',
-      `width:${A4_WIDTH_PX}px`,
-      `min-width:${A4_WIDTH_PX}px`,
-      `max-width:${A4_WIDTH_PX}px`,
-      `min-height:${A4_HEIGHT_PX}px`,
-      'background:#ffffff',
-      'overflow:visible',
-    ].join(';')
-    proxy.innerHTML = el.innerHTML
-    document.body.appendChild(proxy)
-    return proxy
-  }
-
-  async function captureJpeg(proxy: HTMLElement): Promise<string> {
+  async function captureJpeg(el: HTMLElement): Promise<string> {
     const { toJpeg } = await import('html-to-image')
+
+    const saved = {
+      width:        el.style.width,
+      minWidth:     el.style.minWidth,
+      maxWidth:     el.style.maxWidth,
+      margin:       el.style.margin,
+      marginLeft:   el.style.marginLeft,
+      marginRight:  el.style.marginRight,
+      boxShadow:    el.style.boxShadow,
+      outline:      el.style.outline,
+      borderRadius: el.style.borderRadius,
+    }
+
+    el.style.width        = `${A4_WIDTH_PX}px`
+    el.style.minWidth     = `${A4_WIDTH_PX}px`
+    el.style.maxWidth     = `${A4_WIDTH_PX}px`
+    el.style.margin       = '0'
+    el.style.marginLeft   = '0'
+    el.style.marginRight  = '0'
+    el.style.boxShadow    = 'none'
+    el.style.outline      = 'none'
+    el.style.borderRadius = '0'
+
     await document.fonts.ready
-    // Double-call: first pass embeds cross-origin resources (fonts, signed
-    // image URLs); second pass produces the final pixel-correct output.
-    await toJpeg(proxy, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
-    return toJpeg(proxy, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
+
+    try {
+      // Double-call: first pass lets html-to-image embed cross-origin resources
+      // (web fonts, Supabase-signed image URLs); second pass is the final output.
+      await toJpeg(el, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
+      return await toJpeg(el, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
+    } finally {
+      Object.assign(el.style, saved)
+    }
   }
 
   async function downloadJpeg() {
     setLoadingJpeg(true)
     setError('')
-    let proxy: HTMLElement | null = null
     try {
       const el = getEl()
       if (!el) throw new Error('Invoice element not found.')
-      proxy = await buildProxy(el)
-      const dataUrl = await captureJpeg(proxy)
+      const dataUrl = await captureJpeg(el)
       const a = document.createElement('a')
       a.href     = dataUrl
       a.download = `${invoiceLabel}.jpg`
@@ -77,7 +84,6 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed — try Print instead.')
     } finally {
-      if (proxy) document.body.removeChild(proxy)
       setLoadingJpeg(false)
     }
   }
@@ -85,14 +91,11 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   async function downloadPdf() {
     setLoadingPdf(true)
     setError('')
-    let proxy: HTMLElement | null = null
     try {
       const el = getEl()
       if (!el) throw new Error('Invoice element not found.')
-      proxy = await buildProxy(el)
-      const dataUrl = await captureJpeg(proxy)
+      const dataUrl = await captureJpeg(el)
 
-      // Load the image to get natural pixel dimensions.
       const img = await new Promise<HTMLImageElement>((res, rej) => {
         const i = new Image()
         i.onload = () => res(i)
@@ -101,8 +104,8 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
       })
 
       const { jsPDF } = await import('jspdf')
-      // Map the captured image proportionally onto A4 width (210 mm).
-      // Page height matches the invoice content height so nothing is clipped.
+      // Map the captured image proportionally to A4 width (210 mm).
+      // Page height matches invoice content height so nothing is clipped.
       const pdfW = 210
       const pdfH = Math.round((img.naturalHeight / img.naturalWidth) * pdfW)
       const pdf  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [pdfW, pdfH] })
@@ -111,7 +114,6 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed — try Print instead.')
     } finally {
-      if (proxy) document.body.removeChild(proxy)
       setLoadingPdf(false)
     }
   }

@@ -780,14 +780,22 @@ export function CorporateTemplate(d: TemplateData) {
 // Renderer
 // ─────────────────────────────────────────────
 export function TemplateRenderer({ templateId, data }: { templateId: TemplateId; data: TemplateData }) {
+  // Strip blank rows (empty description AND zero price) so placeholder items
+  // created by the builder never appear in the rendered template or export.
+  const clean: TemplateData = {
+    ...data,
+    items: data.items.filter(
+      (i) => i.description.trim() !== '' || i.price > 0
+    ),
+  }
   switch (templateId) {
-    case 'classic':     return <ClassicTemplate    {...data} />
-    case 'modern':      return <ModernTemplate     {...data} />
-    case 'minimal':     return <MinimalTemplate    {...data} />
-    case 'bold':        return <BoldTemplate       {...data} />
-    case 'stripe':      return <StripeTemplate     {...data} />
-    case 'ruled':       return <RuledTemplate      {...data} />
-    case 'corporate':   return <CorporateTemplate  {...data} />
-    default:            return <ModernTemplate     {...data} />
+    case 'classic':     return <ClassicTemplate    {...clean} />
+    case 'modern':      return <ModernTemplate     {...clean} />
+    case 'minimal':     return <MinimalTemplate    {...clean} />
+    case 'bold':        return <BoldTemplate       {...clean} />
+    case 'stripe':      return <StripeTemplate     {...clean} />
+    case 'ruled':       return <RuledTemplate      {...clean} />
+    case 'corporate':   return <CorporateTemplate  {...clean} />
+    default:            return <ModernTemplate     {...clean} />
   }
 }
