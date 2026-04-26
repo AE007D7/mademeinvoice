@@ -20,52 +20,50 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   }
 
   /**
-   * Capture the invoice element as a JPEG data-URL.
+   * Capture the invoice as a JPEG data-URL using html-to-image.
    *
-   * We capture the live `.invoice-print-area` element directly so that all
-   * CSS positioning contexts (absolute children, overflow-hidden clipping) are
-   * preserved exactly as they appear on screen.
+   * ROOT CAUSE OF THE RIGHT-SHIFT / BLACK-BAR BUG
+   * ─────────────────────────────────────────────
+   * html-to-image copies the element's fully-computed styles onto the clone
+   * via getComputedStyle().  `mx-auto` resolves to a concrete pixel value at
+   * that instant (e.g. margin-left: 183 px on a 1440 px viewport).  The clone
+   * therefore has an explicit left margin, so its content renders that many
+   * pixels from the left edge of the fixed-width canvas.  The gap (no HTML
+   * there) is transparent in the SVG and shows as solid black in the JPEG.
    *
-   * Before capture we override the wrapper's decorative inline styles — the
-   * `mx-auto` margin and `ring`/`shadow`/`rounded-xl` classes — because these
-   * can skew html-to-image's SVG-foreignObject canvas boundary, producing
-   * blank left-side space.  All overrides are restored after capture.
+   * THE FIX
+   * ───────
+   * Use html-to-image's `style` option.  It is applied to the clone *after*
+   * the computed-style copy, so it is the last write and is guaranteed to win.
+   * Also pass `backgroundColor` (fills the canvas before drawing) and `width`
+   * (locks the canvas to exactly A4 width, bypassing clientWidth).
    */
   async function captureJpeg(el: HTMLElement): Promise<string> {
     const { toJpeg } = await import('html-to-image')
-
-    const saved = {
-      width:        el.style.width,
-      minWidth:     el.style.minWidth,
-      maxWidth:     el.style.maxWidth,
-      margin:       el.style.margin,
-      marginLeft:   el.style.marginLeft,
-      marginRight:  el.style.marginRight,
-      boxShadow:    el.style.boxShadow,
-      outline:      el.style.outline,
-      borderRadius: el.style.borderRadius,
-    }
-
-    el.style.width        = `${A4_WIDTH_PX}px`
-    el.style.minWidth     = `${A4_WIDTH_PX}px`
-    el.style.maxWidth     = `${A4_WIDTH_PX}px`
-    el.style.margin       = '0'
-    el.style.marginLeft   = '0'
-    el.style.marginRight  = '0'
-    el.style.boxShadow    = 'none'
-    el.style.outline      = 'none'
-    el.style.borderRadius = '0'
-
     await document.fonts.ready
 
-    try {
-      // Double-call: first pass lets html-to-image embed cross-origin resources
-      // (web fonts, Supabase-signed image URLs); second pass is the final output.
-      await toJpeg(el, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
-      return await toJpeg(el, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
-    } finally {
-      Object.assign(el.style, saved)
+    const opts = {
+      quality:         0.95,
+      pixelRatio:      PIXEL_RATIO,
+      cacheBust:       true,
+      backgroundColor: '#ffffff',   // fill canvas before drawing → no black gaps
+      width:           A4_WIDTH_PX, // canvas = exactly A4 width, bypasses clientWidth
+      style: {
+        // Applied to the cloned root element after getComputedStyle copy.
+        // Sets margin to 0 so the clone is not offset from the canvas edge.
+        margin:       '0',
+        marginLeft:   '0',
+        marginRight:  '0',
+        boxShadow:    'none',
+        outline:      'none',
+        borderRadius: '0',
+      } as Partial<CSSStyleDeclaration>,
     }
+
+    // Double-call: first pass lets html-to-image embed cross-origin resources
+    // (web fonts, Supabase signed image URLs); second pass is the final output.
+    await toJpeg(el, opts)
+    return toJpeg(el, opts)
   }
 
   async function downloadJpeg() {
@@ -105,7 +103,6 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
 
       const { jsPDF } = await import('jspdf')
       // Map the captured image proportionally to A4 width (210 mm).
-      // Page height matches invoice content height so nothing is clipped.
       const pdfW = 210
       const pdfH = Math.round((img.naturalHeight / img.naturalWidth) * pdfW)
       const pdf  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [pdfW, pdfH] })
