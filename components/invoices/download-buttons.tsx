@@ -5,6 +5,7 @@ import { ImageIcon, FileDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const A4_WIDTH_PX = 794
+const PIXEL_RATIO = 2
 
 export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   const [loadingJpeg, setLoadingJpeg] = useState(false)
@@ -18,36 +19,39 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     )
   }
 
-  async function captureCanvas(el: HTMLElement): Promise<HTMLCanvasElement> {
-    const { default: html2canvas } = await import('html2canvas-pro')
+  /**
+   * Capture the invoice element as a JPEG data-URL.
+   *
+   * We use html-to-image (foreignObject / SVG approach) instead of
+   * html2canvas because it lets the browser render the actual HTML —
+   * so fonts (Plus Jakarta Sans), oklch colors, gradients, and shadows
+   * all look identical to what the user sees on screen.
+   */
+  async function captureJpeg(el: HTMLElement): Promise<string> {
+    const { toJpeg } = await import('html-to-image')
 
-    // Temporarily force the element to full A4 width.
-    // We only touch width/max/min — not margin — so mx-auto still centers
-    // the element in the real DOM. getBoundingClientRect() will reflect the
-    // real position and html2canvas will crop from there using the REAL
-    // layout (no windowWidth override), keeping virtual == real == correct.
-    const prev = {
-      width:    el.style.width,
-      maxWidth: el.style.maxWidth,
-      minWidth: el.style.minWidth,
-    }
+    // Force A4 width so the export is always 794 px wide regardless of
+    // the current viewport size (e.g. narrow mobile screen).
+    const prev = { width: el.style.width, maxWidth: el.style.maxWidth, minWidth: el.style.minWidth }
     el.style.width    = `${A4_WIDTH_PX}px`
     el.style.maxWidth = `${A4_WIDTH_PX}px`
     el.style.minWidth = `${A4_WIDTH_PX}px`
 
+    // Wait for all web fonts to be loaded before rendering.
+    await document.fonts.ready
+
     try {
-      // NOTE: do NOT pass windowWidth here.
-      // Passing windowWidth: N causes html2canvas to re-layout the virtual
-      // document at width N, shifting mx-auto elements to a different x
-      // than getBoundingClientRect() reports on the real DOM. That
-      // mismatch is what produces a blank left side in the output.
-      return await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      })
+      // html-to-image renders the live browser layout into an SVG
+      // foreignObject and converts it to a canvas.  Because the browser
+      // does the rendering, every CSS feature (oklch, custom properties,
+      // web fonts, gradients, shadows) works out of the box.
+      //
+      // We call toJpeg twice: the first call embeds external resources
+      // (fonts, images) into the clone; the second call produces the
+      // final pixel-correct output.  This is the recommended pattern in
+      // the html-to-image docs for cross-origin resources.
+      await toJpeg(el, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
+      return await toJpeg(el, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
     } finally {
       el.style.width    = prev.width
       el.style.maxWidth = prev.maxWidth
@@ -61,29 +65,16 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     try {
       const el = getEl()
       if (!el) throw new Error('Invoice element not found.')
-      const canvas = await captureCanvas(el)
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            setError('Failed to generate image.')
-            setLoadingJpeg(false)
-            return
-          }
-          const url = URL.createObjectURL(blob)
-          const a   = document.createElement('a')
-          a.href     = url
-          a.download = `${invoiceLabel}.jpg`
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          URL.revokeObjectURL(url)
-          setLoadingJpeg(false)
-        },
-        'image/jpeg',
-        0.95,
-      )
+      const dataUrl = await captureJpeg(el)
+      const a = document.createElement('a')
+      a.href     = dataUrl
+      a.download = `${invoiceLabel}.jpg`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed — try Print instead.')
+    } finally {
       setLoadingJpeg(false)
     }
   }
@@ -94,15 +85,23 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     try {
       const el = getEl()
       if (!el) throw new Error('Invoice element not found.')
-      const canvas   = await captureCanvas(el)
-      const { jsPDF } = await import('jspdf')
+      const dataUrl = await captureJpeg(el)
 
-      // Use proportional page height relative to A4 width (210mm) so the
-      // PDF page exactly fits the captured content — no whitespace padding.
+      // Load the image to get natural pixel dimensions.
+      const img = await new Promise<HTMLImageElement>((res, rej) => {
+        const i = new Image()
+        i.onload = () => res(i)
+        i.onerror = rej
+        i.src = dataUrl
+      })
+
+      const { jsPDF } = await import('jspdf')
+      // The image is A4_WIDTH_PX * PIXEL_RATIO wide.
+      // Map proportionally to A4 width (210mm) to get the PDF page height.
       const pdfW = 210
-      const pdfH = Math.round((canvas.height / canvas.width) * pdfW)
+      const pdfH = Math.round((img.naturalHeight / img.naturalWidth) * pdfW)
       const pdf  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [pdfW, pdfH] })
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pdfW, pdfH)
+      pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfW, pdfH)
       pdf.save(`${invoiceLabel}.pdf`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed — try Print instead.')
