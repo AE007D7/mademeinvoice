@@ -18,35 +18,38 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     )
   }
 
-  async function captureCanvas(el: HTMLElement) {
+  async function captureCanvas(el: HTMLElement): Promise<HTMLCanvasElement> {
     const { default: html2canvas } = await import('html2canvas')
 
-    // Force full A4 width regardless of viewport
-    const prev = { width: el.style.width, maxWidth: el.style.maxWidth, minWidth: el.style.minWidth }
-    el.style.width = `${A4_WIDTH_PX}px`
+    // Temporarily force the element to full A4 width.
+    // We only touch width/max/min — not margin — so mx-auto still centers
+    // the element in the real DOM. getBoundingClientRect() will reflect the
+    // real position and html2canvas will crop from there using the REAL
+    // layout (no windowWidth override), keeping virtual == real == correct.
+    const prev = {
+      width:    el.style.width,
+      maxWidth: el.style.maxWidth,
+      minWidth: el.style.minWidth,
+    }
+    el.style.width    = `${A4_WIDTH_PX}px`
     el.style.maxWidth = `${A4_WIDTH_PX}px`
     el.style.minWidth = `${A4_WIDTH_PX}px`
 
     try {
-      const canvas = await html2canvas(el, {
+      // NOTE: do NOT pass windowWidth here.
+      // Passing windowWidth: N causes html2canvas to re-layout the virtual
+      // document at width N, shifting mx-auto elements to a different x
+      // than getBoundingClientRect() reports on the real DOM. That
+      // mismatch is what produces a blank left side in the output.
+      return await html2canvas(el, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
-        width: A4_WIDTH_PX,
-        windowWidth: 1440,
-        ignoreElements: (node) => {
-          // Skip print:hidden elements (toolbar buttons etc)
-          return node instanceof HTMLElement && (
-            node.classList.contains('print:hidden') ||
-            node.getAttribute('aria-hidden') === 'true'
-          )
-        },
       })
-      return canvas
     } finally {
-      el.style.width = prev.width
+      el.style.width    = prev.width
       el.style.maxWidth = prev.maxWidth
       el.style.minWidth = prev.minWidth
     }
@@ -61,10 +64,14 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
       const canvas = await captureCanvas(el)
       canvas.toBlob(
         (blob) => {
-          if (!blob) { setError('Failed to generate image.'); setLoadingJpeg(false); return }
+          if (!blob) {
+            setError('Failed to generate image.')
+            setLoadingJpeg(false)
+            return
+          }
           const url = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
+          const a   = document.createElement('a')
+          a.href     = url
           a.download = `${invoiceLabel}.jpg`
           document.body.appendChild(a)
           a.click()
@@ -87,13 +94,14 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     try {
       const el = getEl()
       if (!el) throw new Error('Invoice element not found.')
-      const canvas = await captureCanvas(el)
+      const canvas   = await captureCanvas(el)
       const { jsPDF } = await import('jspdf')
 
-      // Keep proportional height relative to A4 width (210mm)
+      // Use proportional page height relative to A4 width (210mm) so the
+      // PDF page exactly fits the captured content — no whitespace padding.
       const pdfW = 210
       const pdfH = Math.round((canvas.height / canvas.width) * pdfW)
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [pdfW, pdfH] })
+      const pdf  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [pdfW, pdfH] })
       pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pdfW, pdfH)
       pdf.save(`${invoiceLabel}.pdf`)
     } catch (err) {
