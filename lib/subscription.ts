@@ -11,7 +11,7 @@ export async function checkInvoiceLimit(
 ): Promise<{ allowed: boolean; reason?: string }> {
   const { data: user } = await supabase
     .from('users')
-    .select('plan, trial_ends_at, extra_credits')
+    .select('plan, trial_ends_at')
     .eq('id', userId)
     .single()
 
@@ -39,19 +39,9 @@ export async function checkInvoiceLimit(
     return { allowed: true }
   }
 
-  // Consume an extra credit if available
-  const credits = user.extra_credits ?? 0
-  if (credits > 0) {
-    await supabase
-      .from('users')
-      .update({ extra_credits: credits - 1 })
-      .eq('id', userId)
-    return { allowed: true }
-  }
-
   return {
     allowed: false,
     reason:
-      'You have reached the 5 invoice limit for the free plan this month. Upgrade to Pro for unlimited invoices, or buy extra credits.',
+      'You have reached the 5 invoice limit for the free plan this month. Upgrade to Pro for unlimited invoices.',
   }
 }

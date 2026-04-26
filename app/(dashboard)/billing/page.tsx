@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { isTrialActive } from '@/lib/subscription'
-import { Check, Zap, Building2, Star } from 'lucide-react'
+import { Check, Zap, Building2 } from 'lucide-react'
 import { PayPalSubscribeButton } from '@/components/billing/paypal-button'
 import { CancelSubscriptionButton, DeleteAccountButton, StripeCheckoutButton } from './billing-actions'
 
@@ -11,7 +11,7 @@ export default async function BillingPage() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('plan, trial_ends_at, extra_credits, paypal_sub_id, stripe_customer_id, subscription_ends_at')
+    .select('plan, trial_ends_at, paypal_sub_id, stripe_customer_id, subscription_ends_at')
     .eq('id', user.id)
     .single()
 
@@ -23,13 +23,11 @@ export default async function BillingPage() {
   const plan = userData?.plan ?? 'free'
   const isPro = plan === 'pro' || plan === 'enterprise'
   const trialActive = isTrialActive(userData?.trial_ends_at ?? null)
-  const extraCredits = userData?.extra_credits ?? 0
   const hasSub = !!(userData?.paypal_sub_id || userData?.stripe_customer_id)
 
   const paypalPlanId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_PRO_MONTHLY ?? ''
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? ''
   const stripePricePro = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO ?? ''
-  const stripeTopupPrice = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_TOPUP ?? ''
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -54,9 +52,6 @@ export default async function BillingPage() {
         </div>
         <p className="text-sm text-muted-foreground">
           Total invoices created: <span className="font-medium text-foreground">{invoiceCount ?? 0}</span>
-          {extraCredits > 0 && (
-            <> &mdash; Extra credits remaining: <span className="font-medium text-foreground">{extraCredits}</span></>
-          )}
         </p>
         {isPro && hasSub && (
           <div className="pt-2">
@@ -134,28 +129,6 @@ export default async function BillingPage() {
               </a>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Topup credits (free plan) */}
-      {!isPro && (
-        <div className="rounded-xl border border-border bg-card p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Star className="h-4 w-4 text-yellow-500" />
-            <p className="text-sm font-medium text-foreground">Buy extra invoices</p>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Get 10 extra invoices for <span className="font-medium text-foreground">$5</span> — no subscription required.
-          </p>
-          {stripeTopupPrice ? (
-            <StripeCheckoutButton
-              label="Buy 10 invoices — $5"
-              priceId={stripeTopupPrice}
-              mode="payment"
-            />
-          ) : (
-            <p className="text-xs text-muted-foreground">Topup not configured yet.</p>
-          )}
         </div>
       )}
 
