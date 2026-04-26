@@ -1,9 +1,25 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/proxy'
+import { countryToLang } from '@/lib/geo-lang'
 
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request })
   const supabase = createClient(request, response)
+
+  // Auto-detect language from IP country on first visit (cookie not yet set).
+  // Vercel injects x-vercel-ip-country on every edge request; Cloudflare uses
+  // cf-ipcountry. We only write the cookie when the user hasn't chosen manually.
+  if (!request.cookies.has('mmi_ui_lang')) {
+    const country =
+      request.headers.get('x-vercel-ip-country') ??
+      request.headers.get('cf-ipcountry')
+    const lang = countryToLang(country)
+    response.cookies.set('mmi_ui_lang', lang, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      sameSite: 'lax',
+    })
+  }
 
   // getUser() validates with Supabase and silently refreshes expiring tokens,
   // writing the updated cookie back via the setAll handler in lib/supabase/proxy.ts
