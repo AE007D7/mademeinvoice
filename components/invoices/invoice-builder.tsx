@@ -170,7 +170,7 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
         <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
       </div>
 
-      <Card>
+      <Card style={{ overflow: 'visible' }}>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm">Line Items</CardTitle>
         </CardHeader>
