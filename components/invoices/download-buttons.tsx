@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { ImageIcon, FileDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const A4_WIDTH_PX = 794
-const PIXEL_RATIO = 2
+const A4_WIDTH_PX  = 794
+const A4_HEIGHT_PX = 1123   // A4 at 96 dpi
+const PIXEL_RATIO  = 2
 
 export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   const [loadingJpeg, setLoadingJpeg] = useState(false)
@@ -20,52 +21,53 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   }
 
   /**
-   * Capture the invoice element as a JPEG data-URL.
+   * Clone the invoice HTML into a clean off-screen proxy div.
    *
-   * We use html-to-image (foreignObject / SVG approach) instead of
-   * html2canvas because it lets the browser render the actual HTML —
-   * so fonts (Plus Jakarta Sans), oklch colors, gradients, and shadows
-   * all look identical to what the user sees on screen.
+   * We deliberately avoid capturing the live `.invoice-print-area` wrapper
+   * because its `mx-auto` margin and `ring-1` / `shadow-sm` decorations can
+   * shift the canvas origin inside html-to-image's SVG foreignObject context,
+   * producing blank left-side space (content appears to the right).
+   *
+   * The proxy sits at `left: -9999px` so it is rendered by the browser (layout
+   * is live) but completely invisible.  All Tailwind classes resolve correctly
+   * because the proxy is still part of the same document and stylesheet.
    */
-  async function captureJpeg(el: HTMLElement): Promise<string> {
+  async function buildProxy(el: HTMLElement): Promise<HTMLElement> {
+    const proxy = document.createElement('div')
+    proxy.style.cssText = [
+      'position:absolute',
+      'top:0',
+      'left:-9999px',
+      `width:${A4_WIDTH_PX}px`,
+      `min-width:${A4_WIDTH_PX}px`,
+      `max-width:${A4_WIDTH_PX}px`,
+      `min-height:${A4_HEIGHT_PX}px`,
+      'background:#ffffff',
+      'overflow:visible',
+    ].join(';')
+    proxy.innerHTML = el.innerHTML
+    document.body.appendChild(proxy)
+    return proxy
+  }
+
+  async function captureJpeg(proxy: HTMLElement): Promise<string> {
     const { toJpeg } = await import('html-to-image')
-
-    // Force A4 width so the export is always 794 px wide regardless of
-    // the current viewport size (e.g. narrow mobile screen).
-    const prev = { width: el.style.width, maxWidth: el.style.maxWidth, minWidth: el.style.minWidth }
-    el.style.width    = `${A4_WIDTH_PX}px`
-    el.style.maxWidth = `${A4_WIDTH_PX}px`
-    el.style.minWidth = `${A4_WIDTH_PX}px`
-
-    // Wait for all web fonts to be loaded before rendering.
     await document.fonts.ready
-
-    try {
-      // html-to-image renders the live browser layout into an SVG
-      // foreignObject and converts it to a canvas.  Because the browser
-      // does the rendering, every CSS feature (oklch, custom properties,
-      // web fonts, gradients, shadows) works out of the box.
-      //
-      // We call toJpeg twice: the first call embeds external resources
-      // (fonts, images) into the clone; the second call produces the
-      // final pixel-correct output.  This is the recommended pattern in
-      // the html-to-image docs for cross-origin resources.
-      await toJpeg(el, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
-      return await toJpeg(el, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
-    } finally {
-      el.style.width    = prev.width
-      el.style.maxWidth = prev.maxWidth
-      el.style.minWidth = prev.minWidth
-    }
+    // Double-call: first pass embeds cross-origin resources (fonts, signed
+    // image URLs); second pass produces the final pixel-correct output.
+    await toJpeg(proxy, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
+    return toJpeg(proxy, { quality: 0.95, pixelRatio: PIXEL_RATIO, cacheBust: true })
   }
 
   async function downloadJpeg() {
     setLoadingJpeg(true)
     setError('')
+    let proxy: HTMLElement | null = null
     try {
       const el = getEl()
       if (!el) throw new Error('Invoice element not found.')
-      const dataUrl = await captureJpeg(el)
+      proxy = await buildProxy(el)
+      const dataUrl = await captureJpeg(proxy)
       const a = document.createElement('a')
       a.href     = dataUrl
       a.download = `${invoiceLabel}.jpg`
@@ -75,6 +77,7 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed — try Print instead.')
     } finally {
+      if (proxy) document.body.removeChild(proxy)
       setLoadingJpeg(false)
     }
   }
@@ -82,10 +85,12 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
   async function downloadPdf() {
     setLoadingPdf(true)
     setError('')
+    let proxy: HTMLElement | null = null
     try {
       const el = getEl()
       if (!el) throw new Error('Invoice element not found.')
-      const dataUrl = await captureJpeg(el)
+      proxy = await buildProxy(el)
+      const dataUrl = await captureJpeg(proxy)
 
       // Load the image to get natural pixel dimensions.
       const img = await new Promise<HTMLImageElement>((res, rej) => {
@@ -96,8 +101,8 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
       })
 
       const { jsPDF } = await import('jspdf')
-      // The image is A4_WIDTH_PX * PIXEL_RATIO wide.
-      // Map proportionally to A4 width (210mm) to get the PDF page height.
+      // Map the captured image proportionally onto A4 width (210 mm).
+      // Page height matches the invoice content height so nothing is clipped.
       const pdfW = 210
       const pdfH = Math.round((img.naturalHeight / img.naturalWidth) * pdfW)
       const pdf  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [pdfW, pdfH] })
@@ -106,6 +111,7 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed — try Print instead.')
     } finally {
+      if (proxy) document.body.removeChild(proxy)
       setLoadingPdf(false)
     }
   }
