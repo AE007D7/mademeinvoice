@@ -65,6 +65,7 @@ export default async function EditInvoicePage({ params }: { params: Params }) {
             notes: invoice.notes ?? '',
             template: invoice.template ?? 'modern',
             accentColor: invoice.accent_color ?? '#6366f1',
+            docType: (invoice.document_type ?? 'invoice') as 'invoice' | 'estimation',
             items,
           }}
         />

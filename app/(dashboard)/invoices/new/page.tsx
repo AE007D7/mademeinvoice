@@ -1,7 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import InvoiceBuilder from '@/components/invoices/invoice-builder'
 
-export default async function NewInvoicePage() {
+type SearchParams = Promise<{ docType?: string }>
+
+export default async function NewInvoicePage({ searchParams }: { searchParams: SearchParams }) {
+  const { docType } = await searchParams
+  const isEstimation = docType === 'estimation'
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -23,8 +27,8 @@ export default async function NewInvoicePage() {
   return (
     <div className="flex flex-col gap-4 lg:h-[calc(100vh-4rem)] lg:overflow-hidden">
       <div className="shrink-0">
-        <h1 className="text-2xl font-bold text-foreground">New Invoice</h1>
-        <p className="text-sm text-muted-foreground">Choose a template, pick colors, and build your invoice.</p>
+        <h1 className="text-2xl font-bold text-foreground">{isEstimation ? 'New Estimate' : 'New Invoice'}</h1>
+        <p className="text-sm text-muted-foreground">Choose a template, pick colors, and build your {isEstimation ? 'estimate' : 'invoice'}.</p>
       </div>
       <div className="lg:min-h-0 lg:flex-1">
         <InvoiceBuilder
@@ -40,6 +44,7 @@ export default async function NewInvoicePage() {
           paymentRib={branding?.rib}
           paymentPaypal={branding?.paypal}
           invoiceLang={branding?.invoice_language}
+          initialValues={isEstimation ? { docType: 'estimation' } : undefined}
         />
       </div>
     </div>

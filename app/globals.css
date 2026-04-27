@@ -146,8 +146,8 @@
 .invoice-print-area .invoice-watermark {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-30deg);
+  left: 30%;
+  transform: translate(-50%, -50%) rotate(-60deg);
   opacity: 0.20;
   pointer-events: none;
   width: 60%;
@@ -161,6 +161,7 @@
   .print\:hidden {
     display: none !important;
   }
+  html,
   body {
     background: white !important;
     color: black !important;
@@ -170,14 +171,22 @@
   }
   .invoice-print-area {
     padding: 0 !important;
+    width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
   }
+  /* Force all table columns visible in print — prevent mobile collapse */
+  .invoice-print-area table  { width: 100% !important; display: table !important; }
+  .invoice-print-area thead  { display: table-header-group !important; }
+  .invoice-print-area tbody  { display: table-row-group !important; }
+  .invoice-print-area tr     { display: table-row !important; }
+  .invoice-print-area td,
+  .invoice-print-area th     { display: table-cell !important; }
   .invoice-watermark {
     position: fixed;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-30deg);
+    left: 30%;
+    transform: translate(-50%, -50%) rotate(-60deg);
     opacity: 0.20;
     z-index: 0;
     width: 60%;

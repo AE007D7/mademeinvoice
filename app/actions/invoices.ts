@@ -19,6 +19,7 @@ export type CreateInvoiceInput = {
   notes?: string | null
   template?: string
   accentColor?: string
+  docType?: 'invoice' | 'estimation'
 }
 
 export async function createInvoiceAction(input: CreateInvoiceInput) {
@@ -60,6 +61,7 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
       notes: input.notes || null,
       template: input.template ?? 'modern',
       accent_color: input.accentColor ?? '#6366f1',
+      document_type: input.docType ?? 'invoice',
       invoice_number: numData ?? null,
     })
     .select()
@@ -111,6 +113,7 @@ export async function updateInvoiceAction(input: UpdateInvoiceInput) {
       notes: input.notes || null,
       template: input.template ?? 'modern',
       accent_color: input.accentColor ?? '#6366f1',
+      document_type: input.docType ?? 'invoice',
     })
     .eq('id', input.invoiceId)
     .eq('user_id', user.id)

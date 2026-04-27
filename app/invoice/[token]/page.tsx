@@ -94,7 +94,7 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
           </div>
           <div className="flex items-center gap-2">
             <PrintButton />
-            <DownloadButtons invoiceLabel={invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase()} />
+            <DownloadButtons invoiceLabel={invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase()} invoiceId={invoice.id} />
           </div>
         </div>
       </div>

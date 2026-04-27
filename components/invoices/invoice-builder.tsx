@@ -26,6 +26,7 @@ type InitialValues = {
   notes?: string
   template?: string
   accentColor?: string
+  docType?: 'invoice' | 'estimation'
   items?: { id: string; description: string; quantity: number; price: number }[]
 }
 
@@ -62,6 +63,7 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
   )
   const [template, setTemplate] = useState<TemplateId>((initialValues?.template ?? 'modern') as TemplateId)
   const [accentColor, setAccentColor] = useState(initialValues?.accentColor ?? '#6366f1')
+  const [docType, setDocType] = useState<'invoice' | 'estimation'>(initialValues?.docType ?? 'invoice')
   const [mobileTab, setMobileTab] = useState<'details' | 'preview'>('details')
   const [error, setError] = useState('')
   const [isPending, setIsPending] = useState(false)
@@ -89,6 +91,7 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
       notes: notes || null,
       template,
       accentColor,
+      docType,
       items: items.map(({ description, quantity, price }) => ({ description, quantity, price })),
     }
     const result = isEditing
@@ -125,10 +128,33 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
     taxAmount,
     total,
     accentColor,
+    docType,
   }
 
   const detailsPanel = (
     <div className="space-y-6 px-4 pt-5 pb-8 sm:px-5">
+
+      {/* Document type toggle */}
+      <div className="space-y-1.5">
+        <Label>Document Type</Label>
+        <div className="grid grid-cols-2 gap-1 rounded-lg border border-input bg-muted/40 p-1">
+          {(['invoice', 'estimation'] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setDocType(type)}
+              className={`rounded-md py-1.5 text-sm font-medium capitalize transition-colors ${
+                docType === type
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {type === 'invoice' ? 'Invoice' : 'Estimation'}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <TemplateSelector value={template} onChange={setTemplate} accentColor={accentColor} />
       <ColorSelector value={accentColor} onChange={setAccentColor} />
 

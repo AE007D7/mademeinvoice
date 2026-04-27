@@ -24,6 +24,7 @@ export type TemplateData = {
   taxAmount: number
   total: number
   accentColor: string
+  docType?: 'invoice' | 'estimation'
   status?: string
   paymentIban?: string | null
   paymentRib?: string | null
@@ -40,7 +41,7 @@ function ContactFooter({ d }: { d: TemplateData }) {
   return (
     <div className="space-y-3">
       {hasPayment && (
-        <div className="rounded-lg border border-gray-100 bg-gray-50 px-5 py-4 text-xs text-gray-700">
+        <div className="rounded-lg border border-gray-100 bg-gray-50 px-5 py-4 text-xs text-gray-700" style={{ backgroundColor: '#f9fafb' }}>
           <p className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: d.accentColor }}>
             <Wallet className="h-3 w-3" />
             {t.paymentDetails}
@@ -119,13 +120,13 @@ export function ClassicTemplate(d: TemplateData) {
             )}
           </div>
           <div className="text-right">
-            <h1 className="text-3xl font-bold uppercase tracking-widest text-gray-800">{t.invoice}</h1>
+            <h1 className="text-3xl font-bold uppercase tracking-widest text-gray-800">{d.docType === 'estimation' ? t.estimation : t.invoice}</h1>
             <p className="mt-0.5 text-sm text-gray-500">#{d.invoiceNumber}</p>
             <p className="text-sm text-gray-500">{d.issueDate}</p>
             {d.dueDate && <p className="text-sm text-gray-500">{t.dueDate}: {d.dueDate}</p>}
           </div>
         </div>
-        <div className="mt-5 h-[3px] rounded-full" style={{ background: d.accentColor }} />
+        <div className="mt-5 h-[3px] rounded-full" style={{ backgroundColor: d.accentColor }} />
       </div>
 
       <div className="flex gap-16 px-12 py-5">
@@ -205,7 +206,7 @@ export function ModernTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
     <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
-      <div className="px-12 py-8" style={{ background: d.accentColor }}>
+      <div className="px-12 py-8" style={{ backgroundColor: d.accentColor }}>
         <div className="flex items-center justify-between">
           <div>
             {d.logoUrl ? (
@@ -217,7 +218,7 @@ export function ModernTemplate(d: TemplateData) {
             <p className="mt-1 text-sm font-medium text-white/60">#{d.invoiceNumber}</p>
           </div>
           <div className="text-right">
-            <h1 className="text-4xl font-black uppercase tracking-wider text-white">{t.invoice}</h1>
+            <h1 className="text-4xl font-black uppercase tracking-wider text-white">{d.docType === 'estimation' ? t.estimation : t.invoice}</h1>
             <p className="mt-1 text-sm text-white/70">{d.issueDate}</p>
             {d.dueDate && <p className="text-sm text-white/70">{t.dueDate} {d.dueDate}</p>}
           </div>
@@ -225,7 +226,7 @@ export function ModernTemplate(d: TemplateData) {
       </div>
 
       <div className="px-12 py-7">
-        <div className="inline-block rounded-xl bg-gray-50 px-5 py-4">
+        <div className="inline-block rounded-xl bg-gray-50 px-5 py-4" style={{ backgroundColor: '#f9fafb' }}>
           <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.billTo}</p>
           <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
           {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
@@ -245,7 +246,7 @@ export function ModernTemplate(d: TemplateData) {
           </thead>
           <tbody>
             {d.items.map((item, i) => (
-              <tr key={item.id} className={i % 2 !== 0 ? 'bg-gray-50/60' : ''}>
+              <tr key={item.id} className={i % 2 !== 0 ? 'bg-gray-50/60' : ''} style={i % 2 !== 0 ? { backgroundColor: '#f3f4f6' } : undefined}>
                 <td className="py-3 text-gray-800">{item.description || '—'}</td>
                 <td className="py-3 text-right text-gray-500">{item.quantity}</td>
                 <td className="py-3 text-right text-gray-500">{d.currency} {item.price.toFixed(2)}</td>
@@ -266,7 +267,7 @@ export function ModernTemplate(d: TemplateData) {
               <span>{t.tax} ({d.taxRate}%)</span><span>{d.currency} {d.taxAmount.toFixed(2)}</span>
             </div>
           )}
-          <div className="mt-3 flex items-center justify-between rounded-xl px-4 py-3 text-white" style={{ background: d.accentColor }}>
+          <div className="mt-3 flex items-center justify-between rounded-xl px-4 py-3 text-white" style={{ backgroundColor: d.accentColor }}>
             <span className="text-sm font-semibold text-white/80">{t.total}</span>
             <span className="text-lg font-bold">{d.currency} {d.total.toFixed(2)}</span>
           </div>
@@ -304,8 +305,8 @@ export function MinimalTemplate(d: TemplateData) {
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-gray-400">{d.companyName}</p>
             )}
           </div>
-          <div className="rounded-full px-3 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-white" style={{ background: d.accentColor }}>
-            {t.invoice}
+          <div className="rounded-full px-3 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-white" style={{ backgroundColor: d.accentColor }}>
+            {d.docType === 'estimation' ? t.estimation : t.invoice}
           </div>
         </div>
 
@@ -378,7 +379,7 @@ export function BoldTemplate(d: TemplateData) {
   const t = getInvoiceT(d.lang)
   return (
     <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
-      <div className="relative overflow-hidden px-12 py-10" style={{ background: d.accentColor }}>
+      <div className="relative overflow-hidden px-12 py-10" style={{ backgroundColor: d.accentColor }}>
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative flex items-end justify-between">
           <div>
@@ -388,7 +389,7 @@ export function BoldTemplate(d: TemplateData) {
             ) : (
               <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-white/70">{d.companyName}</p>
             )}
-            <h1 className="text-5xl font-black uppercase tracking-tight text-white">{t.invoice}</h1>
+            <h1 className="text-5xl font-black uppercase tracking-tight text-white">{d.docType === 'estimation' ? t.estimation : t.invoice}</h1>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-white/90">#{d.invoiceNumber}</p>
@@ -408,7 +409,7 @@ export function BoldTemplate(d: TemplateData) {
           </div>
           <div>
             <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.amountDue}</p>
-            <p className="rounded-xl px-4 py-2 text-2xl font-black text-white" style={{ background: d.accentColor }}>
+            <p className="rounded-xl px-4 py-2 text-2xl font-black text-white" style={{ backgroundColor: d.accentColor }}>
               {d.currency} {d.total.toFixed(2)}
             </p>
             {d.dueDate && <p className="mt-1 text-xs text-gray-400">{t.dueDate} {d.dueDate}</p>}
@@ -453,7 +454,7 @@ export function BoldTemplate(d: TemplateData) {
         </div>
 
         {d.notes && (
-          <div className="mt-8 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+          <div className="mt-8 rounded-xl bg-gray-50 p-4 text-sm text-gray-600" style={{ backgroundColor: '#f9fafb' }}>
             <p className="mb-1 font-semibold text-gray-700">{t.notes}</p>
             <p className="whitespace-pre-line">{d.notes}</p>
           </div>
@@ -474,7 +475,7 @@ export function StripeTemplate(d: TemplateData) {
   return (
     <div className="min-h-[1123px] flex bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       {/* Left stripe */}
-      <div className="w-3 shrink-0" style={{ background: d.accentColor }} />
+      <div className="w-3 shrink-0" style={{ backgroundColor: d.accentColor }} />
 
       {/* Content */}
       <div className="flex-1 px-10 py-10">
@@ -494,7 +495,7 @@ export function StripeTemplate(d: TemplateData) {
             </div>
           </div>
           <div className="text-right">
-            <h1 className="text-3xl font-black uppercase tracking-widest" style={{ color: d.accentColor }}>{t.invoice}</h1>
+            <h1 className="text-3xl font-black uppercase tracking-widest" style={{ color: d.accentColor }}>{d.docType === 'estimation' ? t.estimation : t.invoice}</h1>
             <p className="mt-1 text-sm text-gray-500">#{d.invoiceNumber}</p>
             <p className="text-sm text-gray-500">{d.issueDate}</p>
             {d.dueDate && <p className="text-sm text-gray-500">{t.dueDate}: {d.dueDate}</p>}
@@ -541,7 +542,7 @@ export function StripeTemplate(d: TemplateData) {
             {d.taxRate > 0 && (
               <div className="flex justify-between py-1 text-gray-400"><span>{t.tax} ({d.taxRate}%)</span><span>{d.currency} {d.taxAmount.toFixed(2)}</span></div>
             )}
-            <div className="mt-2 flex items-center justify-between rounded-lg px-3 py-2 font-bold text-white" style={{ background: d.accentColor }}>
+            <div className="mt-2 flex items-center justify-between rounded-lg px-3 py-2 font-bold text-white" style={{ backgroundColor: d.accentColor }}>
               <span>{t.total}</span>
               <span>{d.currency} {d.total.toFixed(2)}</span>
             </div>
@@ -573,7 +574,7 @@ export function RuledTemplate(d: TemplateData) {
   return (
     <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       {/* Top accent bar */}
-      <div className="h-1.5 w-full" style={{ background: d.accentColor }} />
+      <div className="h-1.5 w-full" style={{ backgroundColor: d.accentColor }} />
 
       <div className="px-12 py-9">
         {/* Header */}
@@ -587,7 +588,7 @@ export function RuledTemplate(d: TemplateData) {
             )}
           </div>
           <div className="text-right">
-            <h1 className="text-lg font-bold uppercase tracking-[0.3em]" style={{ color: d.accentColor }}>{t.invoice}</h1>
+            <h1 className="text-lg font-bold uppercase tracking-[0.3em]" style={{ color: d.accentColor }}>{d.docType === 'estimation' ? t.estimation : t.invoice}</h1>
             <p className="text-sm text-gray-500">#{d.invoiceNumber}</p>
           </div>
         </div>
@@ -668,7 +669,7 @@ export function RuledTemplate(d: TemplateData) {
       </div>
 
       {/* Bottom accent bar */}
-      <div className="h-1.5 w-full" style={{ background: d.accentColor }} />
+      <div className="h-1.5 w-full" style={{ backgroundColor: d.accentColor }} />
     </div>
   )
 }
@@ -681,7 +682,7 @@ export function CorporateTemplate(d: TemplateData) {
   return (
     <div className="min-h-[1123px] bg-white font-sans text-gray-900" dir={t.dir} style={{ fontFamily: 'inherit' }}>
       {/* Header band */}
-      <div className="px-10 py-7" style={{ background: d.accentColor }}>
+      <div className="px-10 py-7" style={{ backgroundColor: d.accentColor }}>
         <div className="flex items-center justify-between">
           <div>
             {d.logoUrl ? (
@@ -692,7 +693,7 @@ export function CorporateTemplate(d: TemplateData) {
             )}
           </div>
           <div className="text-right">
-            <h1 className="text-2xl font-black uppercase tracking-[0.2em] text-white">{t.invoice}</h1>
+            <h1 className="text-2xl font-black uppercase tracking-[0.2em] text-white">{d.docType === 'estimation' ? t.estimation : t.invoice}</h1>
             <p className="text-sm text-white/70">#{d.invoiceNumber}</p>
           </div>
         </div>
@@ -725,7 +726,7 @@ export function CorporateTemplate(d: TemplateData) {
       {/* Items table with full grid lines */}
       <table className="w-full text-sm border-b border-gray-200">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
+          <tr className="bg-gray-50 border-b border-gray-200" style={{ backgroundColor: '#f9fafb' }}>
             <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500">{t.description}</th>
             <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500 border-l border-gray-200">{t.qty}</th>
             <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500 border-l border-gray-200">{t.price}</th>
@@ -755,7 +756,7 @@ export function CorporateTemplate(d: TemplateData) {
               <span>{t.tax} ({d.taxRate}%)</span><span>{d.currency} {d.taxAmount.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between px-6 py-3 font-bold text-white text-base" style={{ background: d.accentColor }}>
+          <div className="flex justify-between px-6 py-3 font-bold text-white text-base" style={{ backgroundColor: d.accentColor }}>
             <span>{t.amountDue}</span><span>{d.currency} {d.total.toFixed(2)}</span>
           </div>
         </div>

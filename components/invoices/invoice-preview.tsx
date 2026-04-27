@@ -26,6 +26,7 @@ type Invoice = {
   notes?: string | null
   template?: string | null
   accent_color?: string | null
+  document_type?: string | null
 }
 
 type Branding = {
@@ -89,6 +90,7 @@ export default function InvoicePreview({ invoice, items, client, branding, logoS
     taxAmount,
     total: Number(invoice.total),
     accentColor: invoice.accent_color ?? '#6366f1',
+    docType: (invoice.document_type === 'estimation' ? 'estimation' : 'invoice') as 'invoice' | 'estimation',
     status: invoice.status,
   }
 

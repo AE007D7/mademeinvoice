@@ -4,75 +4,72 @@ import { useState } from 'react'
 import { ImageIcon, FileDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const A4_WIDTH_PX = 794
-const PIXEL_RATIO = 2
+/**
+ * How export works (why previous approaches failed):
+ *
+ * html2canvas clones the DOM into its own headless iframe. That iframe does not
+ * inherit Tailwind v4's CSS custom properties (--spacing, --color-*, etc.) so
+ * every calc(var(--spacing) * N) resolves to 0 → all padding/gap collapses.
+ *
+ * html-to-image (SVG/foreignObject) uses the browser's native CSS engine, so
+ * custom properties work — BUT it bakes getComputedStyle() values into the clone.
+ * On a wide desktop viewport, mx-auto resolves to e.g. margin-left:595px which
+ * is copied into the clone, shifting content right and leaving a black gap.
+ *
+ * THE SOLUTION: load /print/[id] in a hidden same-origin iframe.
+ *   • The print page renders the invoice inside a 794 px container, so mx-auto → 0.
+ *   • html-to-image runs INSIDE that iframe (full CSS loaded) via CaptureClient.
+ *   • CaptureClient posts the finished dataUrl back via postMessage.
+ *   • We receive it here and trigger the download — zero custom rendering logic.
+ *
+ * Result: exported JPEG/PDF is pixel-for-pixel identical to the browser preview.
+ */
 
-export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
+export function DownloadButtons({ invoiceLabel, invoiceId }: { invoiceLabel: string; invoiceId: string }) {
   const [loadingJpeg, setLoadingJpeg] = useState(false)
   const [loadingPdf, setLoadingPdf]   = useState(false)
   const [error, setError]             = useState('')
 
-  function getEl(): HTMLElement | null {
-    return (
-      (document.querySelector('.invoice-print-area') as HTMLElement | null) ??
-      document.getElementById('invoice-preview')
-    )
-  }
+  function captureViaIframe(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const iframe = document.createElement('iframe')
+      iframe.style.cssText =
+        'position:fixed;top:0;left:-9999px;width:794px;height:1px;border:none;' +
+        'opacity:0;pointer-events:none;z-index:-1;'
+      document.body.appendChild(iframe)
 
-  /**
-   * Capture the invoice as a JPEG data-URL using html-to-image.
-   *
-   * ROOT CAUSE OF THE RIGHT-SHIFT / BLACK-BAR BUG
-   * ─────────────────────────────────────────────
-   * html-to-image copies the element's fully-computed styles onto the clone
-   * via getComputedStyle().  `mx-auto` resolves to a concrete pixel value at
-   * that instant (e.g. margin-left: 183 px on a 1440 px viewport).  The clone
-   * therefore has an explicit left margin, so its content renders that many
-   * pixels from the left edge of the fixed-width canvas.  The gap (no HTML
-   * there) is transparent in the SVG and shows as solid black in the JPEG.
-   *
-   * THE FIX
-   * ───────
-   * Use html-to-image's `style` option.  It is applied to the clone *after*
-   * the computed-style copy, so it is the last write and is guaranteed to win.
-   * Also pass `backgroundColor` (fills the canvas before drawing) and `width`
-   * (locks the canvas to exactly A4 width, bypassing clientWidth).
-   */
-  async function captureJpeg(el: HTMLElement): Promise<string> {
-    const { toJpeg } = await import('html-to-image')
-    await document.fonts.ready
+      const cleanup = () => {
+        window.removeEventListener('message', handler)
+        if (document.body.contains(iframe)) document.body.removeChild(iframe)
+      }
 
-    const opts = {
-      quality:         0.95,
-      pixelRatio:      PIXEL_RATIO,
-      cacheBust:       true,
-      backgroundColor: '#ffffff',   // fill canvas before drawing → no black gaps
-      width:           A4_WIDTH_PX, // canvas = exactly A4 width, bypasses clientWidth
-      style: {
-        // Applied to the cloned root element after getComputedStyle copy.
-        // Sets margin to 0 so the clone is not offset from the canvas edge.
-        margin:       '0',
-        marginLeft:   '0',
-        marginRight:  '0',
-        boxShadow:    'none',
-        outline:      'none',
-        borderRadius: '0',
-      } as Partial<CSSStyleDeclaration>,
-    }
+      const timer = setTimeout(() => {
+        cleanup()
+        reject(new Error('Export timed out — please try again.'))
+      }, 45_000)
 
-    // Double-call: first pass lets html-to-image embed cross-origin resources
-    // (web fonts, Supabase signed image URLs); second pass is the final output.
-    await toJpeg(el, opts)
-    return toJpeg(el, opts)
+      function handler(e: MessageEvent) {
+        if (e.data?.type === 'invoiceCaptured') {
+          clearTimeout(timer)
+          cleanup()
+          resolve(e.data.dataUrl as string)
+        } else if (e.data?.type === 'invoiceCaptureFailed') {
+          clearTimeout(timer)
+          cleanup()
+          reject(new Error(e.data.error ?? 'Capture failed.'))
+        }
+      }
+
+      window.addEventListener('message', handler)
+      iframe.src = `/print/${invoiceId}`
+    })
   }
 
   async function downloadJpeg() {
     setLoadingJpeg(true)
     setError('')
     try {
-      const el = getEl()
-      if (!el) throw new Error('Invoice element not found.')
-      const dataUrl = await captureJpeg(el)
+      const dataUrl = await captureViaIframe()
       const a = document.createElement('a')
       a.href     = dataUrl
       a.download = `${invoiceLabel}.jpg`
@@ -80,7 +77,7 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
       a.click()
       document.body.removeChild(a)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed — try Print instead.')
+      setError(err instanceof Error ? err.message : 'Save failed.')
     } finally {
       setLoadingJpeg(false)
     }
@@ -90,26 +87,23 @@ export function DownloadButtons({ invoiceLabel }: { invoiceLabel: string }) {
     setLoadingPdf(true)
     setError('')
     try {
-      const el = getEl()
-      if (!el) throw new Error('Invoice element not found.')
-      const dataUrl = await captureJpeg(el)
+      const dataUrl = await captureViaIframe()
 
       const img = await new Promise<HTMLImageElement>((res, rej) => {
         const i = new Image()
-        i.onload = () => res(i)
+        i.onload  = () => res(i)
         i.onerror = rej
-        i.src = dataUrl
+        i.src     = dataUrl
       })
 
       const { jsPDF } = await import('jspdf')
-      // Map the captured image proportionally to A4 width (210 mm).
       const pdfW = 210
       const pdfH = Math.round((img.naturalHeight / img.naturalWidth) * pdfW)
       const pdf  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [pdfW, pdfH] })
       pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfW, pdfH)
       pdf.save(`${invoiceLabel}.pdf`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed — try Print instead.')
+      setError(err instanceof Error ? err.message : 'Save failed.')
     } finally {
       setLoadingPdf(false)
     }

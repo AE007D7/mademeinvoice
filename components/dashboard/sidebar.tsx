@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
   FileText,
+  ClipboardList,
   Users,
   Package,
   BarChart2,
@@ -56,6 +57,7 @@ export default function Sidebar({ t }: { t: UiT['nav'] }) {
   const navItems = [
     { href: '/dashboard', label: t.dashboard, icon: LayoutDashboard },
     { href: '/invoices', label: t.invoices, icon: FileText },
+    { href: '/estimations', label: t.estimations, icon: ClipboardList },
     { href: '/clients', label: t.clients, icon: Users },
     { href: '/products', label: t.products, icon: Package },
     { href: '/analytics', label: t.analytics, icon: BarChart2 },

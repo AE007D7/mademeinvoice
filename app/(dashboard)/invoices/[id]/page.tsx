@@ -77,7 +77,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
             Edit
           </Button>
           <PrintButton />
-          <DownloadButtons invoiceLabel={invoiceLabel} />
+          <DownloadButtons invoiceLabel={invoiceLabel} invoiceId={id} />
           <CopyLinkButton shareToken={invoice.share_token} />
           <SendEmailButton
             shareToken={invoice.share_token}
@@ -110,6 +110,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
             notes: invoice.notes ?? null,
             template: invoice.template ?? 'modern',
             accent_color: invoice.accent_color ?? '#6366f1',
+            document_type: invoice.document_type ?? 'invoice',
           }}
           items={items}
           client={rawClient}
