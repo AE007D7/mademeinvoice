@@ -5,6 +5,8 @@ import {
   DollarSign,
   Palette,
   Zap,
+  ClipboardList,
+  Languages,
 } from 'lucide-react'
 
 const features = [
@@ -12,43 +14,57 @@ const features = [
     icon: FileText,
     title: 'Professional Invoices',
     description:
-      'PDF-ready invoices with your logo, watermark, and company branding. Print or send in seconds.',
+      'PDF & JPEG-ready invoices with your logo, watermark, and company branding. Print or send in seconds.',
     color: 'bg-indigo-500',
+  },
+  {
+    icon: ClipboardList,
+    title: 'Invoices & Estimates',
+    description:
+      'Switch between Invoice and Estimate with one click. Same professional layout, right document every time.',
+    color: 'bg-violet-500',
   },
   {
     icon: Users,
     title: 'Client Management',
     description:
       'Keep all client details, billing history, and contact info organized in one place.',
-    color: 'bg-violet-500',
+    color: 'bg-sky-500',
   },
   {
     icon: Globe,
     title: 'Global Tax Support',
     description:
       'All 50 US state rates built-in, plus custom international tax for any country.',
-    color: 'bg-sky-500',
+    color: 'bg-emerald-500',
   },
   {
     icon: DollarSign,
     title: 'Multi-Currency',
     description:
       'Bill clients in USD, EUR, GBP, CAD, AUD, and more. Currency shown on every invoice.',
-    color: 'bg-emerald-500',
+    color: 'bg-pink-500',
+  },
+  {
+    icon: Languages,
+    title: '7 Invoice Languages',
+    description:
+      'Generate invoices in English, French, Spanish, German, Arabic, Portuguese, or Italian — automatically.',
+    color: 'bg-amber-500',
   },
   {
     icon: Palette,
     title: 'Custom Branding',
     description:
       'Upload your logo and watermark. Every invoice is on-brand — professional and consistent.',
-    color: 'bg-pink-500',
+    color: 'bg-rose-500',
   },
   {
     icon: Zap,
     title: 'Free Trial',
     description:
-      'Full Pro access for 1 day, no credit card required. Upgrade when you\'re ready.',
-    color: 'bg-amber-500',
+      'Full Pro access for 7 days, no credit card required. Upgrade when you\'re ready.',
+    color: 'bg-orange-500',
   },
 ]
 
@@ -73,7 +89,7 @@ export default function Features() {
         </div>
 
         {/* Cards grid */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => (
             <div
               key={feature.title}

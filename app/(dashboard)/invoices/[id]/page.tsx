@@ -7,6 +7,7 @@ import { DownloadButtons } from '@/components/invoices/download-buttons'
 import { StatusActions } from './status-actions'
 import { SendEmailButton } from './send-email-button'
 import { CopyLinkButton } from './copy-link-button'
+import { ConvertToInvoiceButton } from './convert-to-invoice-button'
 import { Button } from '@/components/ui/button'
 import { Pencil } from 'lucide-react'
 
@@ -91,6 +92,9 @@ export default async function InvoicePage({ params }: { params: Params }) {
         </div>
         <div className="flex flex-wrap gap-2">
           <StatusActions invoiceId={invoice.id} currentStatus={invoice.status} />
+          {invoice.document_type === 'estimation' && (
+            <ConvertToInvoiceButton invoiceId={invoice.id} />
+          )}
         </div>
       </div>
 

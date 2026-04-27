@@ -137,6 +137,21 @@ export async function updateInvoiceAction(input: UpdateInvoiceInput) {
   redirect(`/invoices/${input.invoiceId}`)
 }
 
+export async function convertToInvoiceAction(invoiceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { error } = await supabase
+    .from('invoices')
+    .update({ document_type: 'invoice' })
+    .eq('id', invoiceId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  return { success: true }
+}
+
 export async function updateInvoiceStatus(invoiceId: string, status: string) {
   const supabase = await createClient()
 

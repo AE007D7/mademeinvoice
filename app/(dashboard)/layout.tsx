@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/dashboard/sidebar'
 import { getUiLang } from '@/lib/get-lang'
 import { getUiT } from '@/lib/i18n'
+import { isTrialActive } from '@/lib/subscription'
+import { TrialExpiredOverlay } from '@/components/dashboard/trial-expired-overlay'
 
 export default async function DashboardLayout({
   children,
@@ -18,8 +20,17 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  const lang = await getUiLang()
+  const [langResult, userDataRes] = await Promise.all([
+    getUiLang(),
+    supabase.from('users').select('plan, trial_ends_at').eq('id', user.id).single(),
+  ])
+
+  const lang = langResult
   const t = getUiT(lang)
+
+  const userData = userDataRes.data
+  const plan = userData?.plan ?? 'free'
+  const trialExpired = plan === 'free' && !isTrialActive(userData?.trial_ends_at ?? null)
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -31,6 +42,8 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
+      {/* Blocking overlay shown when free trial has expired */}
+      {trialExpired && <TrialExpiredOverlay />}
     </div>
   )
 }

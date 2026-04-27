@@ -115,7 +115,7 @@ export default function Hero() {
           <div className="space-y-7">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
-              1-day free trial · No credit card required
+              7-day free trial · No credit card required
             </div>
 
             <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-white md:text-5xl lg:text-6xl">
