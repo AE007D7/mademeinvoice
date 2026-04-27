@@ -107,7 +107,24 @@ export type UiT = {
     status: { draft: string; sent: string; paid: string; overdue: string }
     markPaid: string; view: string; paid: string
   }
-  clients: { title: string; newClient: string; noClients: string }
+  clients: {
+    title: string; newClient: string; allClients: string; noClients: string; addFirst: string
+    colName: string; colEmail: string; colAddress: string; edit: string; invoice: string
+  }
+  estimations: {
+    title: string; newEstimation: string; allEstimations: string
+    noEstimations: string; createFirst: string; colNumber: string
+  }
+  dashboard: {
+    title: string; totalRevenue: string; fromPaid: string
+    pending: string; awaitingPayment: string
+    clients: string; totalClients: string
+    invoices: string; allTime: string
+    recentInvoices: string; viewAll: string
+    noInvoices: string; createFirst: string; noClient: string
+    trialEndsIn: string; day: string; days: string
+    upgradePro: string; keepAccess: string
+  }
   settings: {
     title: string; subtitle: string; account: string; plan: string; trialActive: string
     branding: string; companyName: string; phone: string; email: string
@@ -130,7 +147,9 @@ export const UI_T: Record<LangCode, UiT> = {
       status: { draft: 'Draft', sent: 'Sent', paid: 'Paid', overdue: 'Overdue' },
       markPaid: 'Paid', view: 'View', paid: 'Paid',
     },
-    clients: { title: 'Clients', newClient: 'New Client', noClients: 'No clients yet.' },
+    clients: { title: 'Clients', newClient: 'New Client', allClients: 'All Clients', noClients: 'No clients yet.', addFirst: 'Add your first client', colName: 'Name', colEmail: 'Email', colAddress: 'Address', edit: 'Edit', invoice: 'Invoice' },
+    estimations: { title: 'Estimates', newEstimation: 'New Estimate', allEstimations: 'All Estimates', noEstimations: 'No estimates yet.', createFirst: 'Create your first estimate', colNumber: 'Estimate #' },
+    dashboard: { title: 'Dashboard', totalRevenue: 'Total Revenue', fromPaid: 'From paid invoices', pending: 'Pending', awaitingPayment: 'Awaiting payment', clients: 'Clients', totalClients: 'Total clients', invoices: 'Invoices', allTime: 'All time', recentInvoices: 'Recent Invoices', viewAll: 'View all', noInvoices: 'No invoices yet.', createFirst: 'Create your first invoice', noClient: 'No client', trialEndsIn: 'Your free trial ends in', day: 'day', days: 'days', upgradePro: 'Upgrade to Pro', keepAccess: 'to keep unlimited access.' },
     settings: {
       title: 'Settings', subtitle: 'Manage your account and branding.',
       account: 'Account', plan: 'Plan', trialActive: 'Trial active',
@@ -152,7 +171,9 @@ export const UI_T: Record<LangCode, UiT> = {
       status: { draft: 'Brouillon', sent: 'Envoyée', paid: 'Payée', overdue: 'En retard' },
       markPaid: 'Payée', view: 'Voir', paid: 'Payée',
     },
-    clients: { title: 'Clients', newClient: 'Nouveau client', noClients: 'Aucun client.' },
+    clients: { title: 'Clients', newClient: 'Nouveau client', allClients: 'Tous les clients', noClients: 'Aucun client.', addFirst: 'Ajoutez votre premier client', colName: 'Nom', colEmail: 'E-mail', colAddress: 'Adresse', edit: 'Modifier', invoice: 'Facturer' },
+    estimations: { title: 'Devis', newEstimation: 'Nouveau devis', allEstimations: 'Tous les devis', noEstimations: 'Aucun devis.', createFirst: 'Créer votre premier devis', colNumber: 'Devis n°' },
+    dashboard: { title: 'Tableau de bord', totalRevenue: 'Revenus totaux', fromPaid: 'Factures payées', pending: 'En attente', awaitingPayment: 'En attente de paiement', clients: 'Clients', totalClients: 'Total clients', invoices: 'Factures', allTime: 'Tous les temps', recentInvoices: 'Factures récentes', viewAll: 'Voir tout', noInvoices: 'Aucune facture.', createFirst: 'Créer votre première facture', noClient: 'Sans client', trialEndsIn: 'Votre essai gratuit se termine dans', day: 'jour', days: 'jours', upgradePro: 'Passer à Pro', keepAccess: 'pour conserver un accès illimité.' },
     settings: {
       title: 'Paramètres', subtitle: 'Gérez votre compte et votre identité visuelle.',
       account: 'Compte', plan: 'Abonnement', trialActive: 'Essai actif',
@@ -174,7 +195,9 @@ export const UI_T: Record<LangCode, UiT> = {
       status: { draft: 'Borrador', sent: 'Enviada', paid: 'Pagada', overdue: 'Vencida' },
       markPaid: 'Pagada', view: 'Ver', paid: 'Pagada',
     },
-    clients: { title: 'Clientes', newClient: 'Nuevo cliente', noClients: 'Sin clientes.' },
+    clients: { title: 'Clientes', newClient: 'Nuevo cliente', allClients: 'Todos los clientes', noClients: 'Sin clientes.', addFirst: 'Añade tu primer cliente', colName: 'Nombre', colEmail: 'Correo', colAddress: 'Dirección', edit: 'Editar', invoice: 'Facturar' },
+    estimations: { title: 'Presupuestos', newEstimation: 'Nuevo presupuesto', allEstimations: 'Todos los presupuestos', noEstimations: 'Sin presupuestos.', createFirst: 'Crea tu primer presupuesto', colNumber: 'Presupuesto n°' },
+    dashboard: { title: 'Panel', totalRevenue: 'Ingresos totales', fromPaid: 'Facturas pagadas', pending: 'Pendiente', awaitingPayment: 'Esperando pago', clients: 'Clientes', totalClients: 'Total clientes', invoices: 'Facturas', allTime: 'Todos los tiempos', recentInvoices: 'Facturas recientes', viewAll: 'Ver todo', noInvoices: 'Sin facturas.', createFirst: 'Crea tu primera factura', noClient: 'Sin cliente', trialEndsIn: 'Tu período de prueba termina en', day: 'día', days: 'días', upgradePro: 'Actualizar a Pro', keepAccess: 'para mantener acceso ilimitado.' },
     settings: {
       title: 'Ajustes', subtitle: 'Gestiona tu cuenta y marca.',
       account: 'Cuenta', plan: 'Plan', trialActive: 'Prueba activa',
@@ -196,7 +219,9 @@ export const UI_T: Record<LangCode, UiT> = {
       status: { draft: 'Entwurf', sent: 'Gesendet', paid: 'Bezahlt', overdue: 'Überfällig' },
       markPaid: 'Bezahlt', view: 'Ansehen', paid: 'Bezahlt',
     },
-    clients: { title: 'Kunden', newClient: 'Neuer Kunde', noClients: 'Noch keine Kunden.' },
+    clients: { title: 'Kunden', newClient: 'Neuer Kunde', allClients: 'Alle Kunden', noClients: 'Noch keine Kunden.', addFirst: 'Ersten Kunden hinzufügen', colName: 'Name', colEmail: 'E-Mail', colAddress: 'Adresse', edit: 'Bearbeiten', invoice: 'Rechnung' },
+    estimations: { title: 'Angebote', newEstimation: 'Neues Angebot', allEstimations: 'Alle Angebote', noEstimations: 'Noch keine Angebote.', createFirst: 'Erstes Angebot erstellen', colNumber: 'Angebot-Nr.' },
+    dashboard: { title: 'Dashboard', totalRevenue: 'Gesamtumsatz', fromPaid: 'Bezahlte Rechnungen', pending: 'Ausstehend', awaitingPayment: 'Wartet auf Zahlung', clients: 'Kunden', totalClients: 'Alle Kunden', invoices: 'Rechnungen', allTime: 'Gesamt', recentInvoices: 'Letzte Rechnungen', viewAll: 'Alle anzeigen', noInvoices: 'Noch keine Rechnungen.', createFirst: 'Erste Rechnung erstellen', noClient: 'Kein Kunde', trialEndsIn: 'Ihr kostenloser Test endet in', day: 'Tag', days: 'Tagen', upgradePro: 'Auf Pro upgraden', keepAccess: 'für unbegrenzten Zugang.' },
     settings: {
       title: 'Einstellungen', subtitle: 'Konto und Branding verwalten.',
       account: 'Konto', plan: 'Plan', trialActive: 'Testphase aktiv',
@@ -218,7 +243,9 @@ export const UI_T: Record<LangCode, UiT> = {
       status: { draft: 'مسودة', sent: 'مرسلة', paid: 'مدفوعة', overdue: 'متأخرة' },
       markPaid: 'مدفوعة', view: 'عرض', paid: 'مدفوعة',
     },
-    clients: { title: 'العملاء', newClient: 'عميل جديد', noClients: 'لا يوجد عملاء بعد.' },
+    clients: { title: 'العملاء', newClient: 'عميل جديد', allClients: 'جميع العملاء', noClients: 'لا يوجد عملاء بعد.', addFirst: 'أضف أول عميل', colName: 'الاسم', colEmail: 'البريد الإلكتروني', colAddress: 'العنوان', edit: 'تعديل', invoice: 'فاتورة' },
+    estimations: { title: 'عروض الأسعار', newEstimation: 'عرض جديد', allEstimations: 'جميع العروض', noEstimations: 'لا توجد عروض بعد.', createFirst: 'أنشئ أول عرض', colNumber: 'رقم العرض' },
+    dashboard: { title: 'لوحة التحكم', totalRevenue: 'إجمالي الإيرادات', fromPaid: 'من الفواتير المدفوعة', pending: 'معلق', awaitingPayment: 'في انتظار الدفع', clients: 'العملاء', totalClients: 'إجمالي العملاء', invoices: 'الفواتير', allTime: 'الكل', recentInvoices: 'الفواتير الأخيرة', viewAll: 'عرض الكل', noInvoices: 'لا توجد فواتير بعد.', createFirst: 'أنشئ أول فاتورة', noClient: 'بدون عميل', trialEndsIn: 'تنتهي تجربتك المجانية خلال', day: 'يوم', days: 'أيام', upgradePro: 'الترقية إلى Pro', keepAccess: 'للحفاظ على وصول غير محدود.' },
     settings: {
       title: 'الإعدادات', subtitle: 'إدارة حسابك وهويتك البصرية.',
       account: 'الحساب', plan: 'الباقة', trialActive: 'التجربة نشطة',
@@ -240,7 +267,9 @@ export const UI_T: Record<LangCode, UiT> = {
       status: { draft: 'Rascunho', sent: 'Enviada', paid: 'Paga', overdue: 'Vencida' },
       markPaid: 'Paga', view: 'Ver', paid: 'Paga',
     },
-    clients: { title: 'Clientes', newClient: 'Novo cliente', noClients: 'Nenhum cliente ainda.' },
+    clients: { title: 'Clientes', newClient: 'Novo cliente', allClients: 'Todos os clientes', noClients: 'Nenhum cliente ainda.', addFirst: 'Adicione seu primeiro cliente', colName: 'Nome', colEmail: 'E-mail', colAddress: 'Endereço', edit: 'Editar', invoice: 'Faturar' },
+    estimations: { title: 'Orçamentos', newEstimation: 'Novo orçamento', allEstimations: 'Todos os orçamentos', noEstimations: 'Nenhum orçamento ainda.', createFirst: 'Crie seu primeiro orçamento', colNumber: 'Orçamento n°' },
+    dashboard: { title: 'Painel', totalRevenue: 'Receita total', fromPaid: 'De faturas pagas', pending: 'Pendente', awaitingPayment: 'Aguardando pagamento', clients: 'Clientes', totalClients: 'Total de clientes', invoices: 'Faturas', allTime: 'Todos os tempos', recentInvoices: 'Faturas recentes', viewAll: 'Ver tudo', noInvoices: 'Nenhuma fatura ainda.', createFirst: 'Crie sua primeira fatura', noClient: 'Sem cliente', trialEndsIn: 'Seu período de teste termina em', day: 'dia', days: 'dias', upgradePro: 'Upgrade para Pro', keepAccess: 'para manter acesso ilimitado.' },
     settings: {
       title: 'Configurações', subtitle: 'Gerencie sua conta e identidade visual.',
       account: 'Conta', plan: 'Plano', trialActive: 'Período de teste ativo',
@@ -262,7 +291,9 @@ export const UI_T: Record<LangCode, UiT> = {
       status: { draft: 'Bozza', sent: 'Inviata', paid: 'Pagata', overdue: 'Scaduta' },
       markPaid: 'Pagata', view: 'Visualizza', paid: 'Pagata',
     },
-    clients: { title: 'Clienti', newClient: 'Nuovo cliente', noClients: 'Nessun cliente.' },
+    clients: { title: 'Clienti', newClient: 'Nuovo cliente', allClients: 'Tutti i clienti', noClients: 'Nessun cliente.', addFirst: 'Aggiungi il primo cliente', colName: 'Nome', colEmail: 'Email', colAddress: 'Indirizzo', edit: 'Modifica', invoice: 'Fattura' },
+    estimations: { title: 'Preventivi', newEstimation: 'Nuovo preventivo', allEstimations: 'Tutti i preventivi', noEstimations: 'Nessun preventivo.', createFirst: 'Crea il tuo primo preventivo', colNumber: 'Preventivo n°' },
+    dashboard: { title: 'Dashboard', totalRevenue: 'Ricavi totali', fromPaid: 'Fatture pagate', pending: 'In sospeso', awaitingPayment: 'In attesa di pagamento', clients: 'Clienti', totalClients: 'Totale clienti', invoices: 'Fatture', allTime: 'Tutto il tempo', recentInvoices: 'Fatture recenti', viewAll: 'Vedi tutto', noInvoices: 'Nessuna fattura.', createFirst: 'Crea la tua prima fattura', noClient: 'Nessun cliente', trialEndsIn: 'Il tuo periodo di prova termina tra', day: 'giorno', days: 'giorni', upgradePro: 'Aggiorna a Pro', keepAccess: 'per mantenere accesso illimitato.' },
     settings: {
       title: 'Impostazioni', subtitle: 'Gestisci account e branding.',
       account: 'Account', plan: 'Piano', trialActive: 'Prova attiva',

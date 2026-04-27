@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getUiLang } from '@/lib/get-lang'
+import { getUiT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus } from 'lucide-react'
@@ -14,41 +16,42 @@ const STATUS_BADGE: Record<string, string> = {
 
 export default async function InvoicesPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: invoices } = await supabase
-    .from('invoices')
-    .select('id, invoice_number, total, currency, status, created_at, clients(name)')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+  const [lang, { data: invoices }] = await Promise.all([
+    getUiLang(),
+    supabase
+      .from('invoices')
+      .select('id, invoice_number, total, currency, status, created_at, clients(name)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false }),
+  ])
 
+  const t = getUiT(lang)
   const empty = !invoices || invoices.length === 0
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t.invoices.title}</h1>
         <Button render={<Link href="/invoices/new" />} className="gap-1.5">
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">New Invoice</span>
-          <span className="sm:hidden">New</span>
+          <span className="hidden sm:inline">{t.invoices.newInvoice}</span>
+          <span className="sm:hidden">+</span>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Invoices</CardTitle>
+          <CardTitle>{t.invoices.allInvoices}</CardTitle>
         </CardHeader>
         <CardContent>
           {empty ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              No invoices yet.{' '}
+              {t.invoices.noInvoices}{' '}
               <Link href="/invoices/new" className="text-foreground underline underline-offset-2">
-                Create your first invoice
+                {t.invoices.createFirst}
               </Link>
               .
             </div>
@@ -58,6 +61,7 @@ export default async function InvoicesPage() {
               <div className="divide-y divide-border sm:hidden">
                 {invoices.map((inv) => {
                   const client = (inv.clients as unknown) as { name: string } | null
+                  const statusLabel = t.invoices.status[inv.status as keyof typeof t.invoices.status] ?? inv.status
                   return (
                     <div key={inv.id} className="flex items-center gap-3 py-3">
                       <div className="min-w-0 flex-1">
@@ -72,14 +76,14 @@ export default async function InvoicesPage() {
                         <p className="text-sm font-semibold text-foreground">
                           {inv.currency} {Number(inv.total).toFixed(2)}
                         </p>
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_BADGE[inv.status] ?? ''}`}>
-                          {inv.status}
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[inv.status] ?? ''}`}>
+                          {statusLabel}
                         </span>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         {inv.status !== 'paid' && <MarkPaidButton invoiceId={inv.id} />}
                         <Button variant="ghost" size="sm" render={<Link href={`/invoices/${inv.id}`} />}>
-                          View
+                          {t.common.view}
                         </Button>
                       </div>
                     </div>
@@ -92,17 +96,18 @@ export default async function InvoicesPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      <th className="pb-2 pr-4">Invoice #</th>
-                      <th className="pb-2 pr-4">Client</th>
-                      <th className="pb-2 pr-4">Date</th>
-                      <th className="pb-2 pr-4">Amount</th>
-                      <th className="pb-2 pr-4">Status</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.number}</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.client}</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.date}</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.amount}</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.status}</th>
                       <th className="pb-2" />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {invoices.map((inv) => {
                       const client = (inv.clients as unknown) as { name: string } | null
+                      const statusLabel = t.invoices.status[inv.status as keyof typeof t.invoices.status] ?? inv.status
                       return (
                         <tr key={inv.id} className="hover:bg-muted/40">
                           <td className="py-3 pr-4 font-mono text-xs text-muted-foreground">
@@ -116,15 +121,15 @@ export default async function InvoicesPage() {
                             {inv.currency} {Number(inv.total).toFixed(2)}
                           </td>
                           <td className="py-3 pr-4">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_BADGE[inv.status] ?? ''}`}>
-                              {inv.status}
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[inv.status] ?? ''}`}>
+                              {statusLabel}
                             </span>
                           </td>
                           <td className="py-3 text-right">
                             <div className="flex items-center justify-end gap-1">
                               {inv.status !== 'paid' && <MarkPaidButton invoiceId={inv.id} />}
                               <Button variant="ghost" size="sm" render={<Link href={`/invoices/${inv.id}`} />}>
-                                View
+                                {t.common.view}
                               </Button>
                             </div>
                           </td>

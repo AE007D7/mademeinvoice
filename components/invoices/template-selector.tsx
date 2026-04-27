@@ -298,6 +298,127 @@ const TEMPLATES: {
       </svg>
     ),
   },
+  {
+    id: 'noir',
+    name: 'Noir',
+    preview: (
+      <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+        {/* Dark background */}
+        <rect width="120" height="160" fill="#0f172a" />
+        {/* Accent top bar */}
+        <rect x="0" y="0" width="120" height="3" fill="currentColor" />
+        {/* Company name */}
+        <rect x="8" y="10" width="38" height="4" rx="2" fill="#f8fafc" opacity="0.8" />
+        <rect x="8" y="16" width="26" height="2" rx="1" fill="#64748b" />
+        {/* Invoice title in accent */}
+        <rect x="60" y="8" width="52" height="8" rx="2" fill="currentColor" opacity="0.9" />
+        <rect x="72" y="19" width="24" height="2" rx="1" fill="#64748b" />
+        {/* Divider */}
+        <rect x="8" y="26" width="104" height="0.5" fill="#334155" />
+        {/* Bill to card */}
+        <rect x="8" y="30" width="80" height="18" rx="4" fill="#1e293b" />
+        <rect x="12" y="33" width="18" height="2" rx="1" fill="currentColor" opacity="0.7" />
+        <rect x="12" y="37" width="40" height="3" rx="1" fill="#f8fafc" opacity="0.8" />
+        <rect x="12" y="42" width="28" height="2" rx="1" fill="#64748b" />
+        {/* Table rows */}
+        {[0, 1, 2].map(i => (
+          <g key={i}>
+            <rect x="8" y={54 + i * 12} width="104" height="10" fill={i % 2 !== 0 ? '#1e293b' : 'transparent'} />
+            <rect x="8" y={57 + i * 12} width="54" height="2.5" rx="1" fill="#94a3b8" />
+            <rect x="96" y={57 + i * 12} width="16" height="2.5" rx="1" fill="#64748b" />
+          </g>
+        ))}
+        {/* Total badge */}
+        <rect x="62" y="94" width="50" height="14" rx="5" fill="currentColor" />
+        <rect x="66" y="98" width="14" height="2.5" rx="1" fill="white" opacity="0.6" />
+        <rect x="86" y="97" width="22" height="4" rx="1" fill="white" />
+      </svg>
+    ),
+  },
+  {
+    id: 'studio',
+    name: 'Studio',
+    preview: (
+      <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+        <rect width="120" height="160" fill="white" />
+        {/* Sidebar */}
+        <rect x="0" y="0" width="42" height="160" fill="currentColor" />
+        {/* Logo area */}
+        <rect x="6" y="12" width="30" height="4" rx="2" fill="white" opacity="0.85" />
+        {/* Company info lines */}
+        <rect x="6" y="22" width="26" height="2" rx="1" fill="white" opacity="0.45" />
+        <rect x="6" y="26" width="20" height="2" rx="1" fill="white" opacity="0.35" />
+        <rect x="6" y="30" width="24" height="2" rx="1" fill="white" opacity="0.35" />
+        {/* Amount at bottom of sidebar */}
+        <rect x="6" y="118" width="14" height="2" rx="1" fill="white" opacity="0.45" />
+        <rect x="6" y="122" width="30" height="6" rx="2" fill="white" opacity="0.9" />
+        <rect x="6" y="130" width="22" height="2.5" rx="1" fill="white" opacity="0.45" />
+        {/* Invoice title */}
+        <rect x="50" y="10" width="40" height="7" rx="2" fill="#334155" />
+        <rect x="50" y="20" width="22" height="2.5" rx="1" fill="#94a3b8" />
+        {/* Bill to card */}
+        <rect x="50" y="30" width="62" height="18" rx="3" fill="#f9fafb" />
+        <rect x="54" y="33" width="14" height="2" rx="1" fill="#e2e8f0" />
+        <rect x="54" y="37" width="32" height="3" rx="1" fill="#334155" />
+        <rect x="54" y="42" width="24" height="2" rx="1" fill="#94a3b8" />
+        {/* Table */}
+        {[0, 1, 2, 3].map(i => (
+          <g key={i}>
+            <rect x="50" y={54 + i * 10} width="48" height="2.5" rx="1" fill="#cbd5e1" />
+            <rect x="104" y={54 + i * 10} width="10" height="2.5" rx="1" fill="#94a3b8" />
+            <rect x="50" y={59 + i * 10} width="64" height="0.5" fill="#f1f5f9" />
+          </g>
+        ))}
+      </svg>
+    ),
+  },
+  {
+    id: 'luxe',
+    name: 'Luxe',
+    preview: (
+      <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+        <rect width="120" height="160" fill="white" />
+        {/* Top gradient bar */}
+        <defs>
+          <linearGradient id="luxeGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="currentColor" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="120" height="4" fill="url(#luxeGrad)" />
+        {/* Watermark number */}
+        <text x="72" y="32" fontSize="38" fontWeight="900" fill="currentColor" opacity="0.06" letterSpacing="-2">#42</text>
+        {/* Logo */}
+        <rect x="8" y="12" width="36" height="5" rx="2" fill="#334155" />
+        {/* Invoice title */}
+        <rect x="68" y="11" width="44" height="7" rx="2" fill="#334155" />
+        <rect x="70" y="21" width="34" height="2" rx="1" fill="#94a3b8" />
+        {/* Thin accent divider */}
+        <rect x="8" y="32" width="104" height="0.5" fill="currentColor" opacity="0.25" />
+        {/* Two-col: bill to + from */}
+        <rect x="8" y="36" width="14" height="2" rx="1" fill="#e2e8f0" />
+        <rect x="8" y="40" width="40" height="3" rx="1" fill="#334155" />
+        <rect x="8" y="45" width="28" height="2" rx="1" fill="#94a3b8" />
+        <rect x="64" y="36" width="12" height="2" rx="1" fill="#e2e8f0" />
+        <rect x="64" y="40" width="32" height="3" rx="1" fill="#334155" />
+        <rect x="64" y="45" width="22" height="2" rx="1" fill="#94a3b8" />
+        {/* Table with accent top border */}
+        <rect x="8" y="55" width="104" height="1.5" fill="currentColor" />
+        <rect x="8" y="58" width="104" height="0.5" fill="#e5e7eb" />
+        {[0, 1, 2, 3].map(i => (
+          <g key={i}>
+            <rect x="8" y={63 + i * 10} width="56" height="2.5" rx="1" fill="#cbd5e1" />
+            <rect x="96" y={63 + i * 10} width="16" height="2.5" rx="1" fill="#94a3b8" />
+            <rect x="8" y={68 + i * 10} width="104" height="0.5" fill="#f3f4f6" />
+          </g>
+        ))}
+        {/* Full-width total banner */}
+        <rect x="8" y="112" width="104" height="22" rx="6" fill="currentColor" />
+        <rect x="14" y="118" width="18" height="3" rx="1" fill="white" opacity="0.6" />
+        <rect x="72" y="116" width="36" height="6" rx="2" fill="white" />
+      </svg>
+    ),
+  },
 ]
 
 type Props = {
@@ -310,7 +431,7 @@ export default function TemplateSelector({ value, onChange, accentColor }: Props
   return (
     <div>
       <p className="mb-2 text-sm font-medium text-foreground">Template</p>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-5 gap-2">
         {TEMPLATES.map((t) => (
           <button
             key={t.id}

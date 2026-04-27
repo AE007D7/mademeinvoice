@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getUiLang } from '@/lib/get-lang'
+import { getUiT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus } from 'lucide-react'
@@ -16,39 +18,40 @@ export default async function EstimationsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: estimations } = await supabase
-    .from('invoices')
-    .select('id, invoice_number, total, currency, status, created_at, clients(name)')
-    .eq('user_id', user.id)
-    .eq('document_type', 'estimation')
-    .order('created_at', { ascending: false })
+  const [lang, { data: estimations }] = await Promise.all([
+    getUiLang(),
+    supabase
+      .from('invoices')
+      .select('id, invoice_number, total, currency, status, created_at, clients(name)')
+      .eq('user_id', user.id)
+      .eq('document_type', 'estimation')
+      .order('created_at', { ascending: false }),
+  ])
 
+  const t = getUiT(lang)
   const empty = !estimations || estimations.length === 0
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Estimates</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t.estimations.title}</h1>
         <Button render={<Link href="/invoices/new?docType=estimation" />} className="gap-1.5">
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">New Estimate</span>
-          <span className="sm:hidden">New</span>
+          <span className="hidden sm:inline">{t.estimations.newEstimation}</span>
+          <span className="sm:hidden">+</span>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Estimates</CardTitle>
+          <CardTitle>{t.estimations.allEstimations}</CardTitle>
         </CardHeader>
         <CardContent>
           {empty ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              No estimates yet.{' '}
-              <Link
-                href="/invoices/new?docType=estimation"
-                className="text-foreground underline underline-offset-2"
-              >
-                Create your first estimate
+              {t.estimations.noEstimations}{' '}
+              <Link href="/invoices/new?docType=estimation" className="text-foreground underline underline-offset-2">
+                {t.estimations.createFirst}
               </Link>
               .
             </div>
@@ -58,6 +61,7 @@ export default async function EstimationsPage() {
               <div className="divide-y divide-border sm:hidden">
                 {estimations.map((est) => {
                   const client = (est.clients as unknown) as { name: string } | null
+                  const statusLabel = t.invoices.status[est.status as keyof typeof t.invoices.status] ?? est.status
                   return (
                     <div key={est.id} className="flex items-center gap-3 py-3">
                       <div className="min-w-0 flex-1">
@@ -72,12 +76,12 @@ export default async function EstimationsPage() {
                         <p className="text-sm font-semibold text-foreground">
                           {est.currency} {Number(est.total).toFixed(2)}
                         </p>
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_BADGE[est.status] ?? ''}`}>
-                          {est.status}
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[est.status] ?? ''}`}>
+                          {statusLabel}
                         </span>
                       </div>
                       <Button variant="ghost" size="sm" render={<Link href={`/invoices/${est.id}`} />}>
-                        View
+                        {t.common.view}
                       </Button>
                     </div>
                   )
@@ -89,17 +93,18 @@ export default async function EstimationsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      <th className="pb-2 pr-4">Estimate #</th>
-                      <th className="pb-2 pr-4">Client</th>
-                      <th className="pb-2 pr-4">Date</th>
-                      <th className="pb-2 pr-4">Amount</th>
-                      <th className="pb-2 pr-4">Status</th>
+                      <th className="pb-2 pr-4">{t.estimations.colNumber}</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.client}</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.date}</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.amount}</th>
+                      <th className="pb-2 pr-4">{t.invoices.cols.status}</th>
                       <th className="pb-2" />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {estimations.map((est) => {
                       const client = (est.clients as unknown) as { name: string } | null
+                      const statusLabel = t.invoices.status[est.status as keyof typeof t.invoices.status] ?? est.status
                       return (
                         <tr key={est.id} className="hover:bg-muted/40">
                           <td className="py-3 pr-4 font-mono text-xs text-muted-foreground">
@@ -113,13 +118,13 @@ export default async function EstimationsPage() {
                             {est.currency} {Number(est.total).toFixed(2)}
                           </td>
                           <td className="py-3 pr-4">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_BADGE[est.status] ?? ''}`}>
-                              {est.status}
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[est.status] ?? ''}`}>
+                              {statusLabel}
                             </span>
                           </td>
                           <td className="py-3 text-right">
                             <Button variant="ghost" size="sm" render={<Link href={`/invoices/${est.id}`} />}>
-                              View
+                              {t.common.view}
                             </Button>
                           </td>
                         </tr>

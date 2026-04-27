@@ -1,7 +1,7 @@
 import { Phone, Mail, Globe, MapPin, Building2, Wallet, CreditCard } from 'lucide-react'
 import { getInvoiceT } from '@/lib/i18n'
 
-export type TemplateId = 'classic' | 'modern' | 'minimal' | 'bold' | 'stripe' | 'ruled' | 'corporate'
+export type TemplateId = 'classic' | 'modern' | 'minimal' | 'bold' | 'stripe' | 'ruled' | 'corporate' | 'noir' | 'studio' | 'luxe'
 
 export type TemplateData = {
   companyName: string
@@ -114,7 +114,7 @@ export function ClassicTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="mb-1 h-10 w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="mb-1 h-14 w-auto object-contain" />
             ) : (
               <p className="text-xl font-bold tracking-tight">{d.companyName}</p>
             )}
@@ -211,7 +211,7 @@ export function ModernTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-8 w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="h-12 w-auto object-contain brightness-0 invert" />
             ) : (
               <p className="text-lg font-bold text-white/90">{d.companyName}</p>
             )}
@@ -300,7 +300,7 @@ export function MinimalTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-8 w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="h-16 w-auto object-contain" />
             ) : (
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-gray-400">{d.companyName}</p>
             )}
@@ -385,7 +385,7 @@ export function BoldTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="mb-2 h-8 w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="mb-2 h-12 w-auto object-contain brightness-0 invert" />
             ) : (
               <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-white/70">{d.companyName}</p>
             )}
@@ -484,7 +484,7 @@ export function StripeTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-10 w-auto object-contain mb-1" />
+              <img src={d.logoUrl} alt="logo" className="h-14 w-auto object-contain mb-1" />
             ) : (
               <p className="text-xl font-bold tracking-tight text-gray-900">{d.companyName}</p>
             )}
@@ -582,7 +582,7 @@ export function RuledTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-10 w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="h-14 w-auto object-contain" />
             ) : (
               <p className="text-2xl font-black tracking-tight text-gray-900">{d.companyName}</p>
             )}
@@ -687,7 +687,7 @@ export function CorporateTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-8 w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="h-12 w-auto object-contain brightness-0 invert" />
             ) : (
               <p className="text-xl font-black uppercase tracking-wider text-white">{d.companyName}</p>
             )}
@@ -778,6 +778,362 @@ export function CorporateTemplate(d: TemplateData) {
 }
 
 // ─────────────────────────────────────────────
+// NOIR  (dark background, accent highlights)
+// ─────────────────────────────────────────────
+export function NoirTemplate(d: TemplateData) {
+  const t = getInvoiceT(d.lang)
+  const dark   = '#0f172a'
+  const card   = '#1e293b'
+  const border = '#334155'
+  const muted  = '#64748b'
+  const sub    = '#94a3b8'
+  return (
+    <div className="min-h-[1123px] font-sans" style={{ backgroundColor: dark, color: '#f8fafc', fontFamily: 'inherit' }} dir={t.dir}>
+      <div className="h-1 w-full" style={{ backgroundColor: d.accentColor }} />
+
+      <div className="px-12 py-9">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            {d.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={d.logoUrl} alt="logo" className="h-10 w-auto object-contain mb-1 brightness-0 invert" />
+            ) : (
+              <p className="text-xl font-bold tracking-tight" style={{ color: '#f8fafc' }}>{d.companyName}</p>
+            )}
+            <div className="mt-2 space-y-0.5 text-xs" style={{ color: muted }}>
+              {d.companyEmail && <p>{d.companyEmail}</p>}
+              {d.companyPhone && <p>{d.companyPhone}</p>}
+              {d.companyWebsite && <p>{d.companyWebsite}</p>}
+            </div>
+          </div>
+          <div className="text-right">
+            <h1 className="text-4xl font-black uppercase tracking-widest" style={{ color: d.accentColor }}>
+              {d.docType === 'estimation' ? t.estimation : t.invoice}
+            </h1>
+            <p className="mt-1 text-sm" style={{ color: sub }}>#{d.invoiceNumber}</p>
+            <p className="text-sm" style={{ color: muted }}>{d.issueDate}</p>
+            {d.dueDate && <p className="text-sm" style={{ color: muted }}>{t.dueDate}: {d.dueDate}</p>}
+          </div>
+        </div>
+
+        <div className="h-px mb-8" style={{ backgroundColor: border }} />
+
+        {/* Bill to */}
+        <div className="mb-8 rounded-xl p-5" style={{ backgroundColor: card, border: `1px solid ${border}` }}>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: d.accentColor }}>{t.billTo}</p>
+          <p className="font-semibold" style={{ color: '#f8fafc' }}>{d.clientName || 'Client Name'}</p>
+          {d.clientEmail && <p className="text-sm" style={{ color: sub }}>{d.clientEmail}</p>}
+          {d.clientAddress && <p className="whitespace-pre-line text-sm" style={{ color: muted }}>{d.clientAddress}</p>}
+        </div>
+
+        {/* Table */}
+        <table className="w-full text-sm mb-4">
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${border}` }}>
+              <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: muted }}>{t.description}</th>
+              <th className="pb-3 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: muted }}>{t.qty}</th>
+              <th className="pb-3 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: muted }}>{t.price}</th>
+              <th className="pb-3 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: muted }}>{t.lineTotal}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {d.items.map((item, i) => (
+              <tr key={item.id} style={{ borderBottom: `1px solid ${border}`, backgroundColor: i % 2 !== 0 ? card : 'transparent' }}>
+                <td className="py-3" style={{ color: '#e2e8f0' }}>{item.description || '—'}</td>
+                <td className="py-3 text-right" style={{ color: sub }}>{item.quantity}</td>
+                <td className="py-3 text-right" style={{ color: sub }}>{d.currency} {item.price.toFixed(2)}</td>
+                <td className="py-3 text-right font-semibold" style={{ color: '#f8fafc' }}>{d.currency} {(item.quantity * item.price).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Totals */}
+        <div className="flex justify-end mb-8">
+          <div className="w-56 text-sm">
+            <div className="flex justify-between py-2" style={{ color: muted, borderBottom: `1px solid ${border}` }}>
+              <span>{t.subtotal}</span><span>{d.currency} {d.subtotal.toFixed(2)}</span>
+            </div>
+            {d.taxRate > 0 && (
+              <div className="flex justify-between py-2" style={{ color: muted, borderBottom: `1px solid ${border}` }}>
+                <span>{t.tax} ({d.taxRate}%)</span><span>{d.currency} {d.taxAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="mt-3 flex justify-between rounded-xl px-4 py-3 font-bold" style={{ backgroundColor: d.accentColor, color: '#fff' }}>
+              <span>{t.total}</span>
+              <span className="text-lg">{d.currency} {d.total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {d.notes && (
+          <div className="mb-6 rounded-xl p-4 text-sm" style={{ backgroundColor: card, border: `1px solid ${border}`, color: sub }}>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: d.accentColor }}>{t.notes}</p>
+            <p className="whitespace-pre-line">{d.notes}</p>
+          </div>
+        )}
+
+        <div className="pt-4" style={{ borderTop: `1px solid ${border}` }}>
+          <p className="text-center text-xs" style={{ color: '#475569' }}>{t.thankYou}</p>
+          {(d.paymentIban || d.paymentRib || d.paymentPaypal) && (
+            <div className="mt-3 rounded-xl p-4 text-xs" style={{ backgroundColor: card, border: `1px solid ${border}` }}>
+              <p className="mb-2 font-bold uppercase tracking-widest" style={{ color: d.accentColor }}>{t.paymentDetails}</p>
+              <div className="space-y-1" style={{ color: sub }}>
+                {d.paymentIban && <p><span className="font-semibold" style={{ color: muted }}>IBAN: </span><span className="font-mono">{d.paymentIban}</span></p>}
+                {d.paymentRib && <p><span className="font-semibold" style={{ color: muted }}>RIB: </span><span className="font-mono">{d.paymentRib}</span></p>}
+                {d.paymentPaypal && <p><span className="font-semibold" style={{ color: muted }}>PayPal: </span>{d.paymentPaypal}</p>}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// STUDIO  (accent sidebar + white content)
+// ─────────────────────────────────────────────
+export function StudioTemplate(d: TemplateData) {
+  const t = getInvoiceT(d.lang)
+  return (
+    <div className="min-h-[1123px] flex font-sans text-gray-900" style={{ fontFamily: 'inherit' }} dir={t.dir}>
+      {/* Left sidebar */}
+      <div className="w-[210px] shrink-0 flex flex-col px-7 py-9" style={{ backgroundColor: d.accentColor }}>
+        <div className="mb-8">
+          {d.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={d.logoUrl} alt="logo" className="h-10 w-auto object-contain mb-1 brightness-0 invert" />
+          ) : (
+            <p className="text-base font-black leading-tight" style={{ color: '#fff' }}>{d.companyName}</p>
+          )}
+        </div>
+
+        <div className="mb-8 text-xs space-y-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+          {d.companyAddress && <p className="whitespace-pre-line">{d.companyAddress}</p>}
+          {d.companyPhone && <p className="mt-2">{d.companyPhone}</p>}
+          {d.companyEmail && <p>{d.companyEmail}</p>}
+          {d.companyWebsite && <p>{d.companyWebsite}</p>}
+        </div>
+
+        {(d.paymentIban || d.paymentRib || d.paymentPaypal) && (
+          <div className="mb-8">
+            <p className="mb-2 text-[9px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>{t.paymentDetails}</p>
+            <div className="text-xs space-y-2" style={{ color: 'rgba(255,255,255,0.75)' }}>
+              {d.paymentIban && (
+                <p><span className="block text-[9px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>IBAN</span>
+                <span className="font-mono text-[10px] break-all">{d.paymentIban}</span></p>
+              )}
+              {d.paymentRib && (
+                <p><span className="block text-[9px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>RIB</span>
+                <span className="font-mono text-[10px]">{d.paymentRib}</span></p>
+              )}
+              {d.paymentPaypal && (
+                <p><span className="block text-[9px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>PayPal</span>
+                {d.paymentPaypal}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1" />
+
+        {/* Amount at bottom */}
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.45)' }}>{t.amountDue}</p>
+          <p className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.7)' }}>{d.currency}</p>
+          <p className="text-3xl font-black" style={{ color: '#fff', lineHeight: 1.1 }}>{d.total.toFixed(2)}</p>
+          {d.dueDate && <p className="mt-2 text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{t.dueDate} {d.dueDate}</p>}
+        </div>
+      </div>
+
+      {/* Right content */}
+      <div className="flex-1 px-9 py-9">
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-black uppercase tracking-wider text-gray-800">{d.docType === 'estimation' ? t.estimation : t.invoice}</h1>
+            <p className="text-sm text-gray-400 mt-0.5">#{d.invoiceNumber}</p>
+          </div>
+          <div className="text-right text-sm text-gray-400">
+            <p>{d.issueDate}</p>
+          </div>
+        </div>
+
+        <div className="mb-8 rounded-xl p-4" style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.billTo}</p>
+          <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
+          {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
+          {d.clientAddress && <p className="whitespace-pre-line text-sm text-gray-500">{d.clientAddress}</p>}
+        </div>
+
+        <table className="w-full text-sm mb-4">
+          <thead>
+            <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+              <th className="pb-2 text-left text-xs font-bold uppercase tracking-wider text-gray-400">{t.description}</th>
+              <th className="pb-2 text-right text-xs font-bold uppercase tracking-wider text-gray-400">{t.qty}</th>
+              <th className="pb-2 text-right text-xs font-bold uppercase tracking-wider text-gray-400">{t.price}</th>
+              <th className="pb-2 text-right text-xs font-bold uppercase tracking-wider text-gray-400">{t.lineTotal}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {d.items.map((item) => (
+              <tr key={item.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                <td className="py-3 text-gray-700">{item.description || '—'}</td>
+                <td className="py-3 text-right text-gray-500">{item.quantity}</td>
+                <td className="py-3 text-right text-gray-500">{d.currency} {item.price.toFixed(2)}</td>
+                <td className="py-3 text-right font-semibold text-gray-800">{d.currency} {(item.quantity * item.price).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div className="flex justify-end mb-6">
+          <div className="w-48 text-sm">
+            <div className="flex justify-between py-1 text-gray-400">
+              <span>{t.subtotal}</span><span>{d.currency} {d.subtotal.toFixed(2)}</span>
+            </div>
+            {d.taxRate > 0 && (
+              <div className="flex justify-between py-1 text-gray-400">
+                <span>{t.tax} ({d.taxRate}%)</span><span>{d.currency} {d.taxAmount.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {d.notes && (
+          <div className="text-sm text-gray-500 border-t border-gray-100 pt-4">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">{t.notes}</p>
+            <p className="whitespace-pre-line">{d.notes}</p>
+          </div>
+        )}
+
+        <div className="mt-6 pt-4 border-t border-gray-100">
+          <p className="text-center text-xs text-gray-400">{t.thankYou}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// LUXE  (large typography, full-width total banner)
+// ─────────────────────────────────────────────
+export function LuxeTemplate(d: TemplateData) {
+  const t = getInvoiceT(d.lang)
+  return (
+    <div className="min-h-[1123px] bg-white font-sans text-gray-900" style={{ fontFamily: 'inherit' }} dir={t.dir}>
+      {/* Top gradient bar */}
+      <div className="h-1.5" style={{ background: `linear-gradient(90deg, ${d.accentColor} 0%, transparent 100%)` }} />
+
+      <div className="px-12 pt-10 pb-4 relative overflow-hidden">
+        {/* Decorative large watermark number */}
+        <div
+          className="absolute right-6 top-4 font-black leading-none select-none pointer-events-none"
+          style={{ color: d.accentColor, opacity: 0.06, fontSize: '120px', letterSpacing: '-0.04em' }}
+          aria-hidden="true"
+        >
+          #{d.invoiceNumber}
+        </div>
+
+        {/* Header */}
+        <div className="relative flex items-start justify-between">
+          <div>
+            {d.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={d.logoUrl} alt="logo" className="h-16 w-auto object-contain" />
+            ) : (
+              <p className="text-2xl font-black tracking-tight text-gray-900">{d.companyName}</p>
+            )}
+          </div>
+          <div className="text-right">
+            <h1 className="text-3xl font-black uppercase tracking-[0.12em] text-gray-800">{d.docType === 'estimation' ? t.estimation : t.invoice}</h1>
+            <p className="mt-1 text-sm text-gray-400">#{d.invoiceNumber} · {d.issueDate}</p>
+            {d.dueDate && <p className="text-sm text-gray-400">{t.dueDate}: {d.dueDate}</p>}
+          </div>
+        </div>
+
+        <div className="mt-8 mb-7 h-px" style={{ backgroundColor: d.accentColor, opacity: 0.25 }} />
+
+        {/* Bill to + From */}
+        <div className="grid grid-cols-2 gap-10 mb-8">
+          <div>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.billTo}</p>
+            <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
+            {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
+            {d.clientAddress && <p className="whitespace-pre-line text-sm text-gray-500">{d.clientAddress}</p>}
+          </div>
+          <div>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.from}</p>
+            <p className="font-semibold text-gray-900">{d.companyName}</p>
+            {d.companyEmail && <p className="text-sm text-gray-500">{d.companyEmail}</p>}
+            {d.companyPhone && <p className="text-sm text-gray-500">{d.companyPhone}</p>}
+            {d.companyAddress && <p className="whitespace-pre-line text-sm text-gray-500">{d.companyAddress}</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="px-12">
+        <table className="w-full text-sm">
+          <thead>
+            <tr style={{ borderTop: `2px solid ${d.accentColor}`, borderBottom: '1px solid #e5e7eb' }}>
+              <th className="py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500">{t.description}</th>
+              <th className="py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500">{t.qty}</th>
+              <th className="py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500">{t.price}</th>
+              <th className="py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500">{t.lineTotal}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {d.items.map((item) => (
+              <tr key={item.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                <td className="py-3.5 text-gray-800">{item.description || '—'}</td>
+                <td className="py-3.5 text-right text-gray-500">{item.quantity}</td>
+                <td className="py-3.5 text-right text-gray-500">{d.currency} {item.price.toFixed(2)}</td>
+                <td className="py-3.5 text-right font-semibold text-gray-900">{d.currency} {(item.quantity * item.price).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Sub-total row */}
+      <div className="px-12 py-4">
+        <div className="flex justify-end">
+          <div className="w-56 text-sm">
+            <div className="flex justify-between py-1.5 text-gray-400">
+              <span>{t.subtotal}</span><span>{d.currency} {d.subtotal.toFixed(2)}</span>
+            </div>
+            {d.taxRate > 0 && (
+              <div className="flex justify-between py-1.5 text-gray-400">
+                <span>{t.tax} ({d.taxRate}%)</span><span>{d.currency} {d.taxAmount.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Full-width total banner */}
+      <div className="mx-12 mb-8 flex items-center justify-between rounded-2xl px-8 py-5" style={{ backgroundColor: d.accentColor }}>
+        <p className="text-base font-bold" style={{ color: 'rgba(255,255,255,0.75)' }}>{t.total}</p>
+        <p className="text-3xl font-black text-white">{d.currency} {d.total.toFixed(2)}</p>
+      </div>
+
+      <div className="px-12 pb-10">
+        {d.notes && (
+          <div className="mb-5 text-sm text-gray-500">
+            <p className="mb-1 font-semibold text-gray-700">{t.notes}</p>
+            <p className="whitespace-pre-line">{d.notes}</p>
+          </div>
+        )}
+        <ContactFooter d={d} />
+        <p className="mt-4 text-center text-xs text-gray-400">{t.thankYou}</p>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
 // Renderer
 // ─────────────────────────────────────────────
 export function TemplateRenderer({ templateId, data }: { templateId: TemplateId; data: TemplateData }) {
@@ -797,6 +1153,9 @@ export function TemplateRenderer({ templateId, data }: { templateId: TemplateId;
     case 'stripe':      return <StripeTemplate     {...clean} />
     case 'ruled':       return <RuledTemplate      {...clean} />
     case 'corporate':   return <CorporateTemplate  {...clean} />
+    case 'noir':        return <NoirTemplate       {...clean} />
+    case 'studio':      return <StudioTemplate     {...clean} />
+    case 'luxe':        return <LuxeTemplate       {...clean} />
     default:            return <ModernTemplate     {...clean} />
   }
 }
