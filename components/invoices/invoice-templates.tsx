@@ -114,7 +114,7 @@ export function ClassicTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="mb-1 h-14 w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="mb-1 h-[73px] w-auto object-contain" />
             ) : (
               <p className="text-xl font-bold tracking-tight">{d.companyName}</p>
             )}
@@ -211,7 +211,7 @@ export function ModernTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-12 w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="h-[62px] w-auto object-contain brightness-0 invert" />
             ) : (
               <p className="text-lg font-bold text-white/90">{d.companyName}</p>
             )}
@@ -300,7 +300,7 @@ export function MinimalTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-16 w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="h-[83px] w-auto object-contain" />
             ) : (
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-gray-400">{d.companyName}</p>
             )}
@@ -385,7 +385,7 @@ export function BoldTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="mb-2 h-12 w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="mb-2 h-[62px] w-auto object-contain brightness-0 invert" />
             ) : (
               <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-white/70">{d.companyName}</p>
             )}
@@ -484,7 +484,7 @@ export function StripeTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-14 w-auto object-contain mb-1" />
+              <img src={d.logoUrl} alt="logo" className="h-[73px] w-auto object-contain mb-1" />
             ) : (
               <p className="text-xl font-bold tracking-tight text-gray-900">{d.companyName}</p>
             )}
@@ -582,7 +582,7 @@ export function RuledTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-14 w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="h-[73px] w-auto object-contain" />
             ) : (
               <p className="text-2xl font-black tracking-tight text-gray-900">{d.companyName}</p>
             )}
@@ -687,7 +687,7 @@ export function CorporateTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-12 w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="h-[62px] w-auto object-contain brightness-0 invert" />
             ) : (
               <p className="text-xl font-black uppercase tracking-wider text-white">{d.companyName}</p>
             )}
@@ -797,7 +797,7 @@ export function NoirTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-10 w-auto object-contain mb-1 brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="h-[52px] w-auto object-contain mb-1 brightness-0 invert" />
             ) : (
               <p className="text-xl font-bold tracking-tight" style={{ color: '#f8fafc' }}>{d.companyName}</p>
             )}
@@ -904,7 +904,7 @@ export function StudioTemplate(d: TemplateData) {
         <div className="mb-8">
           {d.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={d.logoUrl} alt="logo" className="h-10 w-auto object-contain mb-1 brightness-0 invert" />
+            <img src={d.logoUrl} alt="logo" className="h-[52px] w-auto object-contain mb-1 brightness-0 invert" />
           ) : (
             <p className="text-base font-black leading-tight" style={{ color: '#fff' }}>{d.companyName}</p>
           )}
@@ -1041,7 +1041,7 @@ export function LuxeTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-16 w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="h-[83px] w-auto object-contain" />
             ) : (
               <p className="text-2xl font-black tracking-tight text-gray-900">{d.companyName}</p>
             )}

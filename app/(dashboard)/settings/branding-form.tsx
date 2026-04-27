@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LANGUAGES, type LangCode } from '@/lib/i18n'
+import { LANGUAGES, type LangCode, type UiT } from '@/lib/i18n'
 import { setUiLanguage } from '@/app/actions/language'
 
 type Branding = {
@@ -28,9 +28,10 @@ type Branding = {
 type Props = {
   branding: Branding
   userId: string
+  t: UiT['settings']
 }
 
-export default function BrandingForm({ branding, userId }: Props) {
+export default function BrandingForm({ branding, userId, t }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [companyName, setCompanyName] = useState(branding?.company_name ?? '')
@@ -122,12 +123,12 @@ export default function BrandingForm({ branding, userId }: Props) {
   return (
     <Card className="w-full max-w-lg">
       <CardHeader>
-        <CardTitle className="text-base">Branding</CardTitle>
+        <CardTitle className="text-base">{t.branding}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="companyName">Company Name</Label>
+            <Label htmlFor="companyName">{t.companyName}</Label>
             <Input
               id="companyName"
               placeholder="Acme Inc."
@@ -139,7 +140,7 @@ export default function BrandingForm({ branding, userId }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="invoiceLang">Invoice Language</Label>
+              <Label htmlFor="invoiceLang">{t.invoiceLang}</Label>
               <select
                 id="invoiceLang"
                 value={invoiceLang}
@@ -153,7 +154,7 @@ export default function BrandingForm({ branding, userId }: Props) {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="uiLang">Interface Language</Label>
+              <Label htmlFor="uiLang">{t.uiLang}</Label>
               <select
                 id="uiLang"
                 value={uiLang}
@@ -168,11 +169,11 @@ export default function BrandingForm({ branding, userId }: Props) {
             </div>
           </div>
 
-          <p className="text-xs font-medium text-muted-foreground pt-1">Contact Info (shown at the bottom of invoices)</p>
+          <p className="text-xs font-medium text-muted-foreground pt-1">{t.paymentHint}</p>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">{t.phone}</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -183,7 +184,7 @@ export default function BrandingForm({ branding, userId }: Props) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="contactEmail">Email</Label>
+              <Label htmlFor="contactEmail">{t.email}</Label>
               <Input
                 id="contactEmail"
                 type="email"
@@ -196,7 +197,7 @@ export default function BrandingForm({ branding, userId }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="website">Website</Label>
+            <Label htmlFor="website">{t.website}</Label>
             <Input
               id="website"
               type="text"
@@ -208,7 +209,7 @@ export default function BrandingForm({ branding, userId }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="address">Business Address</Label>
+            <Label htmlFor="address">{t.address}</Label>
             <Input
               id="address"
               placeholder="123 Main St, City, Country"
@@ -218,7 +219,7 @@ export default function BrandingForm({ branding, userId }: Props) {
             />
           </div>
 
-          <p className="text-xs font-medium text-muted-foreground pt-1">Payment Info (shown on invoices)</p>
+          <p className="text-xs font-medium text-muted-foreground pt-1">{t.payment}</p>
 
           <div className="space-y-1.5">
             <Label htmlFor="iban">IBAN</Label>
@@ -256,7 +257,7 @@ export default function BrandingForm({ branding, userId }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="logo">Logo</Label>
+            <Label htmlFor="logo">{t.logo}</Label>
             <Input
               id="logo"
               type="file"
@@ -265,14 +266,12 @@ export default function BrandingForm({ branding, userId }: Props) {
               disabled={isPending}
             />
             {branding?.logo_url && (
-              <p className="text-xs text-muted-foreground">
-                Logo currently set. Upload a new file to replace it.
-              </p>
+              <p className="text-xs text-muted-foreground">{t.logoHint}</p>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="watermark">Watermark</Label>
+            <Label htmlFor="watermark">{t.watermark}</Label>
             <Input
               id="watermark"
               type="file"
@@ -281,22 +280,18 @@ export default function BrandingForm({ branding, userId }: Props) {
               disabled={isPending}
             />
             {branding?.watermark_url && (
-              <p className="text-xs text-muted-foreground">
-                Watermark currently set. Upload a new file to replace it.
-              </p>
+              <p className="text-xs text-muted-foreground">{t.logoHint}</p>
             )}
-            <p className="text-xs text-muted-foreground">
-              The watermark will appear faintly behind invoice content.
-            </p>
+            <p className="text-xs text-muted-foreground">{t.watermarkHint}</p>
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
           {success && (
-            <p className="text-sm text-green-600">Branding saved successfully.</p>
+            <p className="text-sm text-green-600">{t.saved}</p>
           )}
 
           <Button type="submit" disabled={isPending}>
-            {isPending ? 'Saving…' : 'Save Branding'}
+            {isPending ? t.saving : t.save}
           </Button>
         </form>
       </CardContent>

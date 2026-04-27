@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { getUiLang } from '@/lib/get-lang'
 import { getUiT } from '@/lib/i18n'
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus } from 'lucide-react'
 import { MarkPaidButton } from './mark-paid-button'
+import { StatusFilter } from './status-filter'
 
 const STATUS_BADGE: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -14,19 +16,27 @@ const STATUS_BADGE: Record<string, string> = {
   overdue: 'bg-red-100 text-red-700',
 }
 
-export default async function InvoicesPage() {
+type SearchParams = Promise<{ status?: string }>
+
+export default async function InvoicesPage({ searchParams }: { searchParams: SearchParams }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const [lang, { data: invoices }] = await Promise.all([
-    getUiLang(),
-    supabase
-      .from('invoices')
-      .select('id, invoice_number, total, currency, status, created_at, clients(name)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false }),
-  ])
+  const { status: filterStatus } = await searchParams
+
+  let query = supabase
+    .from('invoices')
+    .select('id, invoice_number, total, currency, status, created_at, clients(name)')
+    .eq('user_id', user.id)
+    .eq('document_type', 'invoice')
+    .order('created_at', { ascending: false })
+
+  if (filterStatus && filterStatus !== 'all') {
+    query = query.eq('status', filterStatus)
+  }
+
+  const [lang, { data: invoices }] = await Promise.all([getUiLang(), query])
 
   const t = getUiT(lang)
   const empty = !invoices || invoices.length === 0
@@ -43,17 +53,23 @@ export default async function InvoicesPage() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="space-y-3">
           <CardTitle>{t.invoices.allInvoices}</CardTitle>
+          <Suspense>
+            <StatusFilter />
+          </Suspense>
         </CardHeader>
         <CardContent>
           {empty ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              {t.invoices.noInvoices}{' '}
-              <Link href="/invoices/new" className="text-foreground underline underline-offset-2">
-                {t.invoices.createFirst}
-              </Link>
-              .
+              {filterStatus && filterStatus !== 'all' ? (
+                <>No {filterStatus} invoices.</>
+              ) : (
+                <>{t.invoices.noInvoices}{' '}
+                  <Link href="/invoices/new" className="text-foreground underline underline-offset-2">
+                    {t.invoices.createFirst}
+                  </Link>.</>
+              )}
             </div>
           ) : (
             <>

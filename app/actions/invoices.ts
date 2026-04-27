@@ -152,6 +152,71 @@ export async function convertToInvoiceAction(invoiceId: string) {
   return { success: true }
 }
 
+export async function duplicateInvoiceAction(invoiceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const limit = await checkInvoiceLimit(supabase, user.id)
+  if (!limit.allowed) return { error: limit.reason }
+
+  const [invoiceRes, itemsRes] = await Promise.all([
+    supabase.from('invoices').select('*').eq('id', invoiceId).eq('user_id', user.id).single(),
+    supabase.from('invoice_items').select('description, quantity, price').eq('invoice_id', invoiceId),
+  ])
+
+  if (!invoiceRes.data) return { error: 'Invoice not found.' }
+  const orig = invoiceRes.data
+
+  const { data: numData } = await supabase.rpc('next_invoice_number', { p_user_id: user.id })
+
+  const { data: newInvoice, error: invError } = await supabase
+    .from('invoices')
+    .insert({
+      user_id: user.id,
+      client_id: orig.client_id,
+      amount: orig.amount,
+      tax: orig.tax,
+      total: orig.total,
+      currency: orig.currency,
+      status: 'draft',
+      notes: orig.notes,
+      template: orig.template,
+      accent_color: orig.accent_color,
+      document_type: orig.document_type,
+      due_date: null,
+      invoice_number: numData ?? null,
+    })
+    .select('id')
+    .single()
+
+  if (invError || !newInvoice) return { error: invError?.message ?? 'Failed to duplicate.' }
+
+  const items = itemsRes.data ?? []
+  if (items.length > 0) {
+    await supabase.from('invoice_items').insert(
+      items.map((item) => ({ invoice_id: newInvoice.id, ...item }))
+    )
+  }
+
+  redirect(`/invoices/${newInvoice.id}/edit`)
+}
+
+export async function deleteInvoiceAction(invoiceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { error } = await supabase
+    .from('invoices')
+    .delete()
+    .eq('id', invoiceId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  redirect('/invoices')
+}
+
 export async function updateInvoiceStatus(invoiceId: string, status: string) {
   const supabase = await createClient()
 

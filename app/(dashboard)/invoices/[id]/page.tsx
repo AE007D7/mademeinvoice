@@ -8,6 +8,8 @@ import { StatusActions } from './status-actions'
 import { SendEmailButton } from './send-email-button'
 import { CopyLinkButton } from './copy-link-button'
 import { ConvertToInvoiceButton } from './convert-to-invoice-button'
+import { DuplicateButton } from './duplicate-button'
+import { DeleteButton } from './delete-button'
 import { Button } from '@/components/ui/button'
 import { Pencil } from 'lucide-react'
 
@@ -77,9 +79,11 @@ export default async function InvoicePage({ params }: { params: Params }) {
             <Pencil className="h-3.5 w-3.5" />
             Edit
           </Button>
+          <DuplicateButton invoiceId={id} />
           <PrintButton />
           <DownloadButtons invoiceLabel={invoiceLabel} invoiceId={id} />
           <CopyLinkButton shareToken={invoice.share_token} />
+          <DeleteButton invoiceId={id} />
           <SendEmailButton
             shareToken={invoice.share_token}
             clientEmail={rawClient?.email}

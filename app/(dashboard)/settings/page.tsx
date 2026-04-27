@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getUiLang } from '@/lib/get-lang'
+import { getUiT } from '@/lib/i18n'
 import { isTrialActive } from '@/lib/subscription'
 import BrandingForm from './branding-form'
 
@@ -11,7 +13,8 @@ export default async function SettingsPage() {
 
   if (!user) return null
 
-  const [brandingRes, userRes] = await Promise.all([
+  const [lang, brandingRes, userRes] = await Promise.all([
+    getUiLang(),
     supabase.from('branding').select('*').eq('user_id', user.id).single(),
     supabase
       .from('users')
@@ -20,6 +23,7 @@ export default async function SettingsPage() {
       .single(),
   ])
 
+  const t = getUiT(lang)
   const branding = brandingRes.data
   const userData = userRes.data
   const plan = userData?.plan ?? 'free'
@@ -37,21 +41,19 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your account and branding.
-        </p>
+        <h1 className="text-2xl font-bold text-foreground">{t.settings.title}</h1>
+        <p className="text-sm text-muted-foreground">{t.settings.subtitle}</p>
       </div>
 
       {/* Account info */}
       <div className="rounded-lg border border-border bg-card p-4 text-sm space-y-1">
-        <p className="font-medium text-foreground">Account</p>
+        <p className="font-medium text-foreground">{t.settings.account}</p>
         <p className="text-muted-foreground">{user.email}</p>
         <p className="capitalize text-muted-foreground">
-          Plan: <span className="font-medium text-foreground">{plan}</span>
+          {t.settings.plan}: <span className="font-medium text-foreground">{plan}</span>
           {!isPro && trialActive && (
             <span className="ml-2 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">
-              Trial active
+              {t.settings.trialActive}
             </span>
           )}
           {isPro && (
@@ -108,7 +110,7 @@ export default async function SettingsPage() {
         )}
       </div>
 
-      <BrandingForm branding={branding} userId={user.id} />
+      <BrandingForm branding={branding} userId={user.id} t={t.settings} />
     </div>
   )
 }

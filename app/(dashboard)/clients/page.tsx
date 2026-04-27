@@ -55,7 +55,9 @@ export default async function ClientsPage() {
                 <tbody className="divide-y divide-border">
                   {clients.map((client) => (
                     <tr key={client.id} className="hover:bg-muted/40">
-                      <td className="py-3 pr-4 font-medium">{client.name}</td>
+                      <td className="py-3 pr-4 font-medium">
+                        <Link href={`/clients/${client.id}`} className="hover:underline underline-offset-2">{client.name}</Link>
+                      </td>
                       <td className="py-3 pr-4 text-muted-foreground">{client.email ?? '—'}</td>
                       <td className="py-3 pr-4 text-muted-foreground">{client.address ?? '—'}</td>
                       <td className="py-3 text-right">
