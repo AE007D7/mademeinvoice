@@ -25,7 +25,7 @@ export function TrialExpiredOverlay() {
           Your free trial has ended
         </h2>
         <p className="mb-6 text-center text-sm text-muted-foreground">
-          Upgrade to Pro to keep creating unlimited invoices, estimates, and more — or stay on the free plan (5 invoices/month).
+          Upgrade to Pro to keep creating unlimited invoices, estimates, and more.
         </p>
 
         {/* Pro plan highlight */}
