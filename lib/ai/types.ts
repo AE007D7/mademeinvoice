@@ -39,17 +39,20 @@ export type ExtractedInvoice = {
 
 export type ToolContext = {
   userId: string
-  supabase: SupabaseClient
+  supabase?: SupabaseClient   // required for real tools; undefined is fine for mock executors
   defaultCurrency: string
+  today?: string
+  userCountry?: string
+  baseUrl?: string            // origin for share links, e.g. http://localhost:3000
 }
 
 // ── SSE event shapes (sent to the client) ────────────────────────────────
 
-export type SSETextEvent     = { type: 'text';        content: string }
-export type SSEToolCallEvent = { type: 'tool_call';   name: string; input: Record<string, unknown> }
-export type SSEToolResultEvent = { type: 'tool_result'; name: string; output: unknown }
-export type SSEDoneEvent     = { type: 'done' }
-export type SSEErrorEvent    = { type: 'error';       message: string }
+export type SSETextEvent       = { type: 'text';        content: string }
+export type SSEToolCallEvent   = { type: 'tool_call';   id: string; name: string; input: Record<string, unknown> }
+export type SSEToolResultEvent = { type: 'tool_result'; tool_use_id: string; name: string; output: unknown }
+export type SSEDoneEvent       = { type: 'done' }
+export type SSEErrorEvent      = { type: 'error';       message: string }
 
 export type SSEEvent =
   | SSETextEvent

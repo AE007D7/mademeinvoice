@@ -243,6 +243,53 @@ async function scenarioC() {
   return allPassed
 }
 
+async function scenarioD() {
+  console.log('\n── Scenario D: new client auto-save via `client` field ──────')
+  const messages: MessageParam[] = []
+  let allPassed = true
+
+  messages.push({ role: 'user', content: 'invoice for brand new client Sarah Lee 1000 USD logo design' })
+  const turn1 = await runAgentTurn(messages, 'USD')
+
+  console.log(`  Turn 1 tools called: [${turn1.toolsCalled.join(', ')}]`)
+  console.log(`  Turn 1 text:\n    "${turn1.assistantText.slice(0, 200).replace(/\n/g, '\n    ')}"`)
+
+  // Confirm
+  messages.push({ role: 'user', content: 'yes' })
+  const turn2 = await runAgentTurn(messages, 'USD')
+
+  console.log(`  Turn 2 tools called: [${turn2.toolsCalled.join(', ')}]`)
+
+  if (!turn2.toolsCalled.includes('create_invoice')) {
+    fail('D1: create_invoice called', 'create_invoice not called after confirmation')
+    allPassed = false
+    return allPassed
+  }
+  pass('D1: create_invoice called after confirmation')
+
+  // Expect: create_invoice payload has client.name = "Sarah Lee" (no clientId)
+  const createIdx = turn2.toolsCalled.indexOf('create_invoice')
+  const payload = turn2.toolInputs[createIdx] as Record<string, unknown>
+  const client = payload?.client as { name?: string } | undefined
+  const clientId = payload?.clientId as string | undefined
+
+  if (!client?.name || !/sarah lee/i.test(client.name)) {
+    fail('D2: client.name=Sarah Lee in payload', `Got client=${JSON.stringify(client)}, clientId=${clientId}`)
+    allPassed = false
+  } else {
+    pass(`D2: client.name="${client.name}" passed to create_invoice`)
+  }
+
+  if (clientId) {
+    fail('D3: no clientId when client is new', `clientId was provided (${clientId}) but client is brand-new — should use client field instead`)
+    allPassed = false
+  } else {
+    pass('D3: no clientId for brand-new client (correct)')
+  }
+
+  return allPassed
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -252,9 +299,10 @@ async function main() {
     scenarioA(),
     scenarioB(),
     scenarioC(),
+    scenarioD(),
   ])
 
-  const labels = ['Scenario A', 'Scenario B', 'Scenario C']
+  const labels = ['Scenario A', 'Scenario B', 'Scenario C', 'Scenario D']
   let totalFailed = 0
 
   console.log('\n' + '─'.repeat(56))

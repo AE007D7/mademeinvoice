@@ -142,6 +142,15 @@
   background-clip: text;
 }
 
+/* Floating chat button glow pulse */
+@keyframes chat-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.511 0.262 277.7 / 0.5); }
+  50%       { box-shadow: 0 0 0 10px oklch(0.511 0.262 277.7 / 0); }
+}
+.chat-pulse {
+  animation: chat-pulse 2s ease-in-out infinite;
+}
+
 /* Watermark — screen view */
 .invoice-print-area .invoice-watermark {
   position: absolute;

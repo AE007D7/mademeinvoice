@@ -5,6 +5,7 @@ import { getUiLang } from '@/lib/get-lang'
 import { getUiT } from '@/lib/i18n'
 import { isTrialActive } from '@/lib/subscription'
 import { TrialExpiredOverlay } from '@/components/dashboard/trial-expired-overlay'
+import { FloatingChatButton } from '@/components/ai-chat/FloatingChatButton'
 
 export default async function DashboardLayout({
   children,
@@ -44,6 +45,8 @@ export default async function DashboardLayout({
       </div>
       {/* Blocking overlay shown when free trial has expired */}
       {trialExpired && <TrialExpiredOverlay />}
+      {/* Floating AI chat button — hidden on /chat page */}
+      <FloatingChatButton />
     </div>
   )
 }

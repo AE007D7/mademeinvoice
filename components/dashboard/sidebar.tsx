@@ -12,6 +12,7 @@ import {
   BarChart2,
   Settings,
   CreditCard,
+  MessageSquare,
   LogOut,
   Menu,
   X,
@@ -63,6 +64,7 @@ export default function Sidebar({ t }: { t: UiT['nav'] }) {
     { href: '/analytics', label: t.analytics, icon: BarChart2 },
     { href: '/settings', label: t.settings, icon: Settings },
     { href: '/billing', label: t.billing, icon: CreditCard },
+    { href: '/chat', label: t.chat, icon: MessageSquare },
   ]
 
   const nav = (

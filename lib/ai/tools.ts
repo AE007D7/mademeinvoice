@@ -8,8 +8,17 @@ import type {
   CreatedInvoiceResult,
 } from './types'
 
-const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.mademeinvoice.com'
+function getAppUrl(ctx: ToolContext): string {
+  if (ctx.baseUrl) return ctx.baseUrl
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
+}
+
+function requireSupabase(ctx: ToolContext) {
+  if (!ctx.supabase) throw new Error('Real tool handlers require a Supabase client.')
+  return ctx.supabase
+}
 
 // ─── Anthropic tool schemas ───────────────────────────────────────────────────
 
@@ -68,7 +77,17 @@ export const TOOL_DEFINITIONS: Tool[] = [
       properties: {
         clientId: {
           type: 'string',
-          description: 'Client UUID from get_client. Omit if no client.',
+          description: 'Client UUID from get_client. Provide this when get_client returned a match.',
+        },
+        client: {
+          type: 'object',
+          description: 'Client details to auto-save when get_client returned null. Omit if clientId is provided.',
+          properties: {
+            name:    { type: 'string', description: 'Client name.' },
+            email:   { type: 'string', description: 'Client email. Optional.' },
+            address: { type: 'string', description: 'Client address. Optional.' },
+          },
+          required: ['name'],
         },
         currency: {
           type: 'string',
@@ -116,10 +135,10 @@ async function handleGetClient(
   input: { query: string },
   ctx: ToolContext
 ): Promise<ClientRecord | null> {
-  const { supabase, userId } = ctx
+  const supabase = requireSupabase(ctx)
+  const { userId } = ctx
   const q = input.query.trim()
 
-  // Try name fuzzy match first, then exact email
   const { data } = await supabase
     .from('clients')
     .select('id, name, email, address')
@@ -136,7 +155,8 @@ async function handleListRecentClients(
   input: { limit?: number },
   ctx: ToolContext
 ): Promise<ClientRecord[]> {
-  const { supabase, userId } = ctx
+  const supabase = requireSupabase(ctx)
+  const { userId } = ctx
   const limit = Math.min(input.limit ?? 10, 20)
 
   // Pull recent invoices and deduplicate clients
@@ -165,7 +185,8 @@ async function handleListProducts(
   input: { query?: string },
   ctx: ToolContext
 ): Promise<ProductRecord[]> {
-  const { supabase, userId } = ctx
+  const supabase = requireSupabase(ctx)
+  const { userId } = ctx
 
   let q = supabase
     .from('products')
@@ -185,6 +206,7 @@ async function handleListProducts(
 async function handleCreateInvoice(
   input: {
     clientId?: string
+    client?: { name: string; email?: string; address?: string }
     currency: string
     taxRate?: number
     items: { description: string; quantity: number; price: number }[]
@@ -194,11 +216,24 @@ async function handleCreateInvoice(
   },
   ctx: ToolContext
 ): Promise<CreatedInvoiceResult | { error: string; code: 'plan_limit' | 'db_error' }> {
-  const { userId, supabase } = ctx
+  const supabase = requireSupabase(ctx)
+  const { userId } = ctx
+
+  // Auto-create client record when agent passes name but no saved ID
+  let resolvedClientId: string | null = input.clientId ?? null
+  if (!resolvedClientId && input.client?.name) {
+    const { data: newClient } = await supabase
+      .from('clients')
+      .insert({ user_id: userId, name: input.client.name, email: input.client.email ?? null, address: input.client.address ?? null })
+      .select('id')
+      .single()
+    resolvedClientId = newClient?.id ?? null
+  }
+
   try {
     const result = await createInvoiceCore(
       {
-        clientId: input.clientId ?? null,
+        clientId: resolvedClientId,
         currency: input.currency,
         taxRate: input.taxRate ?? 0,
         items: input.items,
@@ -214,7 +249,7 @@ async function handleCreateInvoice(
     return {
       id: result.id,
       share_token: result.share_token,
-      share_url: `${APP_URL}/invoice/${result.share_token}`,
+      share_url: `${getAppUrl(ctx)}/invoice/${result.share_token}`,
       invoice_number: result.invoice_number,
     }
   } catch (err) {

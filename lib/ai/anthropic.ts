@@ -91,20 +91,34 @@ export async function extractInvoice(
 // Streams assistant text via onEvent callbacks, executes tool calls, loops until
 // stop_reason === 'end_turn'. Mutates `messages` in place (appends turns).
 
+// ─── Chat turn — full agentic loop with streaming ─────────────────────────────
+// Streams assistant text via onEvent callbacks, executes tool calls, loops until
+// stop_reason === 'end_turn'. Mutates `messages` in place (appends turns).
+// Pass a custom `toolExecutor` to override the real DB-backed executor (e.g. for tests).
+
+export type ToolExecutor = (
+  name: string,
+  input: Record<string, unknown>,
+  ctx: ToolContext
+) => Promise<unknown>
+
 export async function chatTurn(
   messages: MessageParam[],
   context: ToolContext,
-  onEvent: (event: SSEEvent) => void
+  onEvent: (event: SSEEvent) => void,
+  toolExecutor: ToolExecutor = executeToolCall
 ): Promise<void> {
   const client = getClient()
   const system = readPrompt('agent.md')
+  const today = context.today ?? new Date().toISOString().slice(0, 10)
 
-  // Inject runtime context into the system prompt
   const systemWithContext = [
     system,
     '',
-    `## Runtime context`,
-    `- User default currency: ${context.defaultCurrency}`,
+    '## Runtime context',
+    `- today: ${today}`,
+    `- user_default_currency: ${context.defaultCurrency}`,
+    `- user_country: ${context.userCountry ?? 'unknown'}`,
   ].join('\n')
 
   while (true) {
@@ -116,23 +130,18 @@ export async function chatTurn(
       messages,
     })
 
-    // Stream text deltas to the caller in real time
     stream.on('text', (chunk) => {
       onEvent({ type: 'text', content: chunk })
     })
 
-    // Wait for the full assistant message
     const finalMsg = await stream.finalMessage()
 
-    // Append assistant turn to history
     messages.push({ role: 'assistant', content: finalMsg.content })
 
-    // If no tool calls, we're done
     if (finalMsg.stop_reason !== 'tool_use') {
       break
     }
 
-    // Execute all tool calls in the response
     const toolResultBlocks: ToolResultBlockParam[] = []
 
     for (const block of finalMsg.content) {
@@ -141,17 +150,18 @@ export async function chatTurn(
 
       onEvent({
         type: 'tool_call',
+        id: toolBlock.id,
         name: toolBlock.name,
         input: toolBlock.input as Record<string, unknown>,
       })
 
-      const output = await executeToolCall(
+      const output = await toolExecutor(
         toolBlock.name,
         toolBlock.input as Record<string, unknown>,
         context
       )
 
-      onEvent({ type: 'tool_result', name: toolBlock.name, output })
+      onEvent({ type: 'tool_result', tool_use_id: toolBlock.id, name: toolBlock.name, output })
 
       toolResultBlocks.push({
         type: 'tool_result',
@@ -160,7 +170,6 @@ export async function chatTurn(
       })
     }
 
-    // Feed tool results back into the conversation and loop
     messages.push({ role: 'user', content: toolResultBlocks })
   }
 
