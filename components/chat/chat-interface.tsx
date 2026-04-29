@@ -2,9 +2,10 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Send, Loader2, ExternalLink, ChevronDown, ChevronRight, Bot, Sparkles, Mic } from 'lucide-react'
+import { Send, Loader2, ExternalLink, ChevronDown, ChevronRight, Bot, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { VoiceRecorder } from '@/components/ai-chat/VoiceRecorder'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,17 +21,6 @@ type InvoiceCreated = {
   share_token: string
   share_url: string
   invoice_number: string
-}
-
-// ─── Web Speech API shim ──────────────────────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnySpeechRecognition = any
-
-function getSpeechRecognition(): (new () => AnySpeechRecognition) | null {
-  if (typeof window === 'undefined') return null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const w = window as any
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }
 
 // ─── Tool call pill ───────────────────────────────────────────────────────────
@@ -190,99 +180,22 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
   const [input, setInput] = useState('')
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [listening, setListening] = useState(false)
+  const [voiceActive, setVoiceActive] = useState(false)
   const [voiceError, setVoiceError] = useState<string | null>(null)
-  const [voiceSupported, setVoiceSupported] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const recognitionRef = useRef<AnySpeechRecognition>(null)
-  // Accumulates confirmed (final) transcript chunks across pauses
-  const finalTranscriptRef = useRef('')
-
-  useEffect(() => {
-    setVoiceSupported(getSpeechRecognition() !== null)
-  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Resize textarea whenever input changes (e.g. after voice transcript arrives)
   useEffect(() => {
-    return () => {
-      try { recognitionRef.current?.stop() } catch { /* already stopped */ }
-    }
-  }, [])
-
-  const resizeTextarea = useCallback(() => {
-    requestAnimationFrame(() => {
-      const el = textareaRef.current
-      if (el) { el.style.height = 'auto'; el.style.height = `${el.scrollHeight}px` }
-    })
-  }, [])
-
-  const toggleVoice = useCallback(() => {
-    setVoiceError(null)
-
-    if (listening) {
-      recognitionRef.current?.stop()
-      // onend will set listening=false
-      return
-    }
-
-    const SR = getSpeechRecognition()
-    if (!SR) return
-
-    const recognition = new SR()
-    // continuous=true keeps the session open through natural speech pauses
-    recognition.continuous = true
-    recognition.interimResults = true
-    recognition.lang = navigator.language || 'en-US'
-    recognitionRef.current = recognition
-    finalTranscriptRef.current = ''   // reset accumulated text for this session
-
-    recognition.onstart = () => setListening(true)
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recognition.onresult = (event: any) => {
-      let interim = ''
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const chunk = event.results[i][0].transcript
-        if (event.results[i].isFinal) {
-          finalTranscriptRef.current += chunk + ' '
-        } else {
-          interim += chunk
-        }
-      }
-      // Combine confirmed + live interim so user sees full text as they speak
-      const full = (finalTranscriptRef.current + interim).trim()
-      setInput(full)
-      resizeTextarea()
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recognition.onerror = (event: any) => {
-      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        setVoiceError('Microphone access denied. Allow it in your browser settings.')
-        setListening(false)
-      } else if (event.error === 'network') {
-        setVoiceError('Speech recognition needs an internet connection.')
-        setListening(false)
-      }
-      // 'no-speech' and 'audio-capture' are non-fatal — keep the session open
-    }
-
-    recognition.onend = () => setListening(false)
-
-    recognition.start()
-  }, [listening, resizeTextarea])
+    const el = textareaRef.current
+    if (el) { el.style.height = 'auto'; el.style.height = `${el.scrollHeight}px` }
+  }, [input])
 
   const send = useCallback(async (text: string) => {
-    // Stop any active voice recognition before sending
-    if (listening) {
-      recognitionRef.current?.stop()
-      setListening(false)
-    }
-
     const trimmed = text.trim()
     if (!trimmed || loading) return
 
@@ -392,10 +305,10 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
       })
     } finally {
       setLoading(false)
-      textareaRef.current?.focus()
+      if (!voiceActive) textareaRef.current?.focus()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, listening, sessionId, messages.length])
+  }, [loading, sessionId, voiceActive])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -432,11 +345,6 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
               <h2 className="text-lg font-semibold text-foreground">What would you like to invoice?</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Type or speak your invoice — I'll handle the rest.
-                {voiceSupported && (
-                  <span className="ml-1 inline-flex items-center gap-1 text-primary">
-                    <Mic className="h-3 w-3" /> Voice enabled
-                  </span>
-                )}
               </p>
             </div>
             <div className="grid w-full max-w-md gap-2 sm:grid-cols-2">
@@ -467,79 +375,57 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
         <div className="mx-auto max-w-2xl">
           <div className={cn(
             'flex items-end gap-2 rounded-2xl border bg-card px-4 py-3 shadow-sm transition-colors',
-            listening
-              ? 'border-red-400 ring-1 ring-red-300'
+            voiceActive
+              ? 'border-primary/50 ring-1 ring-primary/20'
               : 'border-border focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20'
           )}>
-            {/* Voice mic button */}
-            {voiceSupported && (
-              <div className="relative shrink-0">
-                {/* Ping rings — visible only while recording */}
-                {listening && (
-                  <>
-                    <span className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-400/60" />
-                    <span className="absolute inset-0 -m-0.5 rounded-full bg-red-400/20" />
-                  </>
-                )}
-                <button
-                  type="button"
-                  onClick={toggleVoice}
-                  disabled={loading}
-                  aria-label={listening ? 'Stop recording' : 'Start voice input'}
-                  className={cn(
-                    'relative flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 disabled:opacity-40',
-                    listening
-                      ? 'bg-red-500 text-white shadow-lg shadow-red-500/40 scale-110'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                  )}
-                >
-                  <Mic className="h-4 w-4" />
-                  {/* REC dot */}
-                  {listening && (
-                    <span className="absolute -right-0.5 -top-0.5 h-2 w-2 animate-pulse rounded-full border border-white bg-red-300" />
-                  )}
-                </button>
-              </div>
-            )}
-
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={listening ? 'Listening… speak your invoice' : 'Invoice Acme $500 for design work…'}
-              rows={1}
+            <VoiceRecorder
+              onTranscript={(text) => { setInput(text); setVoiceError(null) }}
+              onSend={send}
+              onActiveChange={setVoiceActive}
+              onError={setVoiceError}
               disabled={loading}
-              className={cn(
-                'min-h-[24px] flex-1 resize-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground',
-                'max-h-32 overflow-y-auto',
-                listening && 'placeholder:text-red-400'
-              )}
-              style={{ height: 'auto' }}
-              onInput={(e) => {
-                const t = e.currentTarget
-                t.style.height = 'auto'
-                t.style.height = `${t.scrollHeight}px`
-              }}
             />
-            <Button
-              type="button"
-              size="icon-sm"
-              onClick={() => send(input)}
-              disabled={loading || !input.trim()}
-              className="shrink-0 gradient-primary text-white hover:opacity-90 disabled:opacity-40"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            </Button>
+
+            {!voiceActive && (
+              <>
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Invoice Acme $500 for design work…"
+                  rows={1}
+                  disabled={loading}
+                  className="min-h-[24px] max-h-32 flex-1 resize-none overflow-y-auto bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  style={{ height: 'auto' }}
+                  onInput={(e) => {
+                    const t = e.currentTarget
+                    t.style.height = 'auto'
+                    t.style.height = `${t.scrollHeight}px`
+                  }}
+                />
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  onClick={() => send(input)}
+                  disabled={loading || !input.trim()}
+                  className="shrink-0 gradient-primary text-white hover:opacity-90 disabled:opacity-40"
+                >
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+              </>
+            )}
           </div>
+
           {voiceError && (
             <p className="mt-1.5 text-center text-[10px] text-red-500">{voiceError}</p>
           )}
           <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
-            {listening ? (
-              <span className="text-red-500">Recording… speak freely, click mic to stop, then press Enter</span>
+            {voiceActive ? (
+              <span className="text-primary">Recording… tap stop when done</span>
             ) : (
-              <>Enter to send · Shift+Enter for new line{voiceSupported && ' · Mic for voice'}</>
+              'Enter to send · Shift+Enter for new line · Mic for voice'
             )}
           </p>
         </div>
