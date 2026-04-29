@@ -21,16 +21,25 @@ function readPrompt(name: string): string {
 // ─── Extractor ────────────────────────────────────────────────────────────────
 // Sends a single non-streaming call to Haiku and parses JSON.
 
+export type ExtractorContext = {
+  defaultCurrency: string
+  userCountry?: string
+  today?: string
+}
+
 export async function extractInvoice(
   text: string,
-  context: { defaultCurrency: string }
+  context: ExtractorContext
 ): Promise<ExtractedInvoice | null> {
   const client = getClient()
   const system = readPrompt('extractor.md')
+  const today = context.today ?? new Date().toISOString().slice(0, 10)
 
   const userMessage = [
-    `Default currency: ${context.defaultCurrency}`,
-    `User input: ${text}`,
+    `today: ${today}`,
+    `user_default_currency: ${context.defaultCurrency}`,
+    `user_country: ${context.userCountry ?? 'US'}`,
+    `text: "${text}"`,
   ].join('\n')
 
   const response = await client.messages.create({
@@ -50,19 +59,28 @@ export async function extractInvoice(
 
   try {
     const parsed = JSON.parse(cleaned) as ExtractedInvoice
-    // Ensure required shape
     if (!Array.isArray(parsed.items)) return null
     return {
-      clientName: parsed.clientName,
+      document_type: parsed.document_type === 'estimation' ? 'estimation' : 'invoice',
+      client: {
+        name: parsed.client?.name ?? null,
+        email: parsed.client?.email ?? null,
+        address: parsed.client?.address ?? null,
+      },
       items: parsed.items.map((i) => ({
         description: String(i.description ?? ''),
         quantity: Number(i.quantity ?? 1),
         price: Number(i.price ?? 0),
       })),
       currency: parsed.currency ?? context.defaultCurrency,
-      taxRate: parsed.taxRate !== undefined ? Number(parsed.taxRate) : undefined,
-      dueDate: parsed.dueDate ?? null,
+      tax_rate: Number(parsed.tax_rate ?? 0),
+      due_date: parsed.due_date ?? null,
       notes: parsed.notes ?? null,
+      confidence: {
+        overall: Number(parsed.confidence?.overall ?? 0.8),
+        missing_fields: parsed.confidence?.missing_fields ?? [],
+        assumptions: parsed.confidence?.assumptions ?? [],
+      },
     }
   } catch {
     return null

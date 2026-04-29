@@ -99,6 +99,11 @@ export const TOOL_DEFINITIONS: Tool[] = [
           type: 'string',
           description: 'Footer notes, payment instructions, etc. Optional.',
         },
+        document_type: {
+          type: 'string',
+          enum: ['invoice', 'estimation'],
+          description: 'Whether to create an invoice or an estimate/quote. Default: invoice.',
+        },
       },
       required: ['currency', 'items'],
     },
@@ -185,6 +190,7 @@ async function handleCreateInvoice(
     items: { description: string; quantity: number; price: number }[]
     dueDate?: string
     notes?: string
+    document_type?: 'invoice' | 'estimation'
   },
   ctx: ToolContext
 ): Promise<CreatedInvoiceResult | { error: string; code: 'plan_limit' | 'db_error' }> {
@@ -200,7 +206,7 @@ async function handleCreateInvoice(
         notes: input.notes ?? null,
         template: 'modern',
         accentColor: '#6366f1',
-        docType: 'invoice',
+        docType: input.document_type ?? 'invoice',
       },
       userId,
       supabase

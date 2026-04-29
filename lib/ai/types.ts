@@ -12,13 +12,27 @@ export type ExtractedItem = {
   price: number
 }
 
+export type ExtractedClient = {
+  name: string | null
+  email: string | null
+  address: string | null
+}
+
+export type ExtractionConfidence = {
+  overall: number
+  missing_fields: string[]
+  assumptions: string[]
+}
+
 export type ExtractedInvoice = {
-  clientName?: string
+  document_type: 'invoice' | 'estimation'
+  client: ExtractedClient
   items: ExtractedItem[]
   currency: string
-  taxRate?: number
-  dueDate?: string | null
-  notes?: string | null
+  tax_rate: number
+  due_date: string | null
+  notes: string | null
+  confidence: ExtractionConfidence
 }
 
 // ── Chat context passed to every tool handler ─────────────────────────────

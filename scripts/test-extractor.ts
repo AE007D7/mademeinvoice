@@ -1,8 +1,6 @@
 /**
  * Manual extractor test: npx tsx scripts/test-extractor.ts
- *
- * Requires ANTHROPIC_API_KEY in .env.local (loaded via dotenv below).
- * The extractor.md prompt must be filled in before running.
+ * Requires ANTHROPIC_API_KEY in .env.local
  */
 
 import { config } from 'dotenv'
@@ -14,24 +12,35 @@ import type { ExtractedInvoice } from '../lib/ai/types'
 
 // ─── Test cases ───────────────────────────────────────────────────────────────
 
-type TestCase = {
+type Expect = {
+  document_type?: 'invoice' | 'estimation'
+  clientNameIncludes?: string
+  currency?: string
+  itemCount?: number
+  firstItemPriceMin?: number
+  firstItemPriceMax?: number
+  firstItemQty?: number
+  tax_rate?: number
+  hasDueDate?: boolean
+}
+
+type Case = {
   label: string
   input: string
   defaultCurrency: string
-  expect: Partial<ExtractedInvoice> & {
-    itemCount?: number
-    firstItemPriceMin?: number
-    firstItemPriceMax?: number
-  }
+  userCountry?: string
+  expect: Expect
 }
 
-const CASES: TestCase[] = [
+const CASES: Case[] = [
   {
-    label: 'English short',
+    label: 'English short — 50k INR web design',
     input: 'invoice ravi 50k web design',
     defaultCurrency: 'INR',
+    userCountry: 'IN',
     expect: {
-      clientName: 'ravi',
+      document_type: 'invoice',
+      clientNameIncludes: 'ravi',
       currency: 'INR',
       itemCount: 1,
       firstItemPriceMin: 49999,
@@ -39,23 +48,29 @@ const CASES: TestCase[] = [
     },
   },
   {
-    label: 'English detailed',
+    label: 'English detailed — consulting + setup, USD, net 30',
     input: 'Invoice John Smith for 3 hours of consulting at $150/hr and a setup fee of $200. Due in 30 days.',
     defaultCurrency: 'USD',
+    userCountry: 'US',
     expect: {
-      clientName: 'john',
+      document_type: 'invoice',
+      clientNameIncludes: 'john',
       currency: 'USD',
       itemCount: 2,
+      firstItemQty: 3,
       firstItemPriceMin: 149,
       firstItemPriceMax: 151,
+      hasDueDate: true,
     },
   },
   {
-    label: 'Hinglish',
+    label: 'Hinglish — 2 lakh logo design',
     input: 'Ravi ko invoice bhejo — 2 lakh ka logo design',
     defaultCurrency: 'INR',
+    userCountry: 'IN',
     expect: {
-      clientName: 'ravi',
+      document_type: 'invoice',
+      clientNameIncludes: 'ravi',
       currency: 'INR',
       itemCount: 1,
       firstItemPriceMin: 199999,
@@ -63,23 +78,26 @@ const CASES: TestCase[] = [
     },
   },
   {
-    label: 'French',
+    label: 'French — estimation 3000 EUR net 15',
     input: "Facture pour Marie — développement site web 3000 euros, délai 15 jours",
     defaultCurrency: 'EUR',
+    userCountry: 'FR',
     expect: {
-      clientName: 'marie',
+      clientNameIncludes: 'marie',
       currency: 'EUR',
       itemCount: 1,
       firstItemPriceMin: 2999,
       firstItemPriceMax: 3001,
+      hasDueDate: true,
     },
   },
   {
-    label: 'Ambiguous currency — USD inferred from $',
+    label: 'Ambiguous currency — $ overrides EUR default',
     input: 'Create invoice for Alex — $500 for monthly social media management',
     defaultCurrency: 'EUR',
+    userCountry: 'US',
     expect: {
-      clientName: 'alex',
+      clientNameIncludes: 'alex',
       currency: 'USD',
       itemCount: 1,
       firstItemPriceMin: 499,
@@ -87,10 +105,12 @@ const CASES: TestCase[] = [
     },
   },
   {
-    label: '2 lakh number parsing',
+    label: '2.5 lakh number parsing',
     input: 'invoice priya sharma 2.5 lakh branding project',
     defaultCurrency: 'INR',
+    userCountry: 'IN',
     expect: {
+      clientNameIncludes: 'priya',
       currency: 'INR',
       itemCount: 1,
       firstItemPriceMin: 249999,
@@ -101,66 +121,76 @@ const CASES: TestCase[] = [
     label: 'Missing client — items only',
     input: 'invoice for 3 WordPress pages at 8000 each',
     defaultCurrency: 'INR',
+    userCountry: 'IN',
     expect: {
       currency: 'INR',
       itemCount: 1,
+      firstItemQty: 3,
       firstItemPriceMin: 7999,
       firstItemPriceMax: 8001,
     },
   },
   {
-    label: 'Multiple line items',
-    input: 'Invoice Carlos: UI design 2000 EUR, frontend dev 5000 EUR, 10% tax',
+    label: 'Multiple line items + 10% tax + estimation',
+    input: 'Estimate Carlos: UI design 2000 EUR, frontend dev 5000 EUR, 10% tax',
     defaultCurrency: 'EUR',
+    userCountry: 'ES',
     expect: {
-      clientName: 'carlos',
+      document_type: 'estimation',
+      clientNameIncludes: 'carlos',
       currency: 'EUR',
       itemCount: 2,
       firstItemPriceMin: 1999,
       firstItemPriceMax: 2001,
+      tax_rate: 10,
     },
   },
 ]
 
-// ─── Runner ───────────────────────────────────────────────────────────────────
+// ─── Checker ──────────────────────────────────────────────────────────────────
 
-type PassResult = { pass: true }
-type FailResult = { pass: false; reasons: string[] }
-type Result = PassResult | FailResult
+function check(got: ExtractedInvoice | null, exp: Expect): string[] {
+  if (!got) return ['extractInvoice returned null']
+  const fail: string[] = []
 
-function check(got: ExtractedInvoice | null, exp: TestCase['expect']): Result {
-  if (!got) return { pass: false, reasons: ['extractInvoice returned null'] }
+  if (exp.document_type && got.document_type !== exp.document_type)
+    fail.push(`document_type: expected ${exp.document_type}, got ${got.document_type}`)
 
-  const reasons: string[] = []
-
-  if (exp.clientName !== undefined) {
-    const gotName = (got.clientName ?? '').toLowerCase()
-    if (!gotName.includes(exp.clientName.toLowerCase())) {
-      reasons.push(`clientName: expected to include "${exp.clientName}", got "${got.clientName}"`)
-    }
+  if (exp.clientNameIncludes) {
+    const name = (got.client?.name ?? '').toLowerCase()
+    if (!name.includes(exp.clientNameIncludes.toLowerCase()))
+      fail.push(`client.name: expected to include "${exp.clientNameIncludes}", got "${got.client?.name}"`)
   }
 
-  if (exp.currency !== undefined && got.currency !== exp.currency) {
-    reasons.push(`currency: expected ${exp.currency}, got ${got.currency}`)
+  if (exp.currency && got.currency !== exp.currency)
+    fail.push(`currency: expected ${exp.currency}, got ${got.currency}`)
+
+  if (exp.itemCount !== undefined && got.items.length !== exp.itemCount)
+    fail.push(`itemCount: expected ${exp.itemCount}, got ${got.items.length}`)
+
+  const first = got.items[0]
+  if (first) {
+    if (exp.firstItemQty !== undefined && first.quantity !== exp.firstItemQty)
+      fail.push(`items[0].quantity: expected ${exp.firstItemQty}, got ${first.quantity}`)
+    if (exp.firstItemPriceMin !== undefined && first.price < exp.firstItemPriceMin)
+      fail.push(`items[0].price: expected ≥ ${exp.firstItemPriceMin}, got ${first.price}`)
+    if (exp.firstItemPriceMax !== undefined && first.price > exp.firstItemPriceMax)
+      fail.push(`items[0].price: expected ≤ ${exp.firstItemPriceMax}, got ${first.price}`)
   }
 
-  if (exp.itemCount !== undefined && got.items.length !== exp.itemCount) {
-    reasons.push(`itemCount: expected ${exp.itemCount}, got ${got.items.length}`)
-  }
+  if (exp.tax_rate !== undefined && got.tax_rate !== exp.tax_rate)
+    fail.push(`tax_rate: expected ${exp.tax_rate}, got ${got.tax_rate}`)
 
-  const firstPrice = got.items[0]?.price ?? 0
-  if (exp.firstItemPriceMin !== undefined && firstPrice < exp.firstItemPriceMin) {
-    reasons.push(`firstItem.price: expected ≥ ${exp.firstItemPriceMin}, got ${firstPrice}`)
-  }
-  if (exp.firstItemPriceMax !== undefined && firstPrice > exp.firstItemPriceMax) {
-    reasons.push(`firstItem.price: expected ≤ ${exp.firstItemPriceMax}, got ${firstPrice}`)
-  }
+  if (exp.hasDueDate && !got.due_date)
+    fail.push(`due_date: expected a value, got null`)
 
-  return reasons.length === 0 ? { pass: true } : { pass: false, reasons }
+  return fail
 }
 
+// ─── Runner ───────────────────────────────────────────────────────────────────
+
 async function run() {
-  console.log('\n🧪  Extractor test suite\n' + '─'.repeat(50))
+  console.log('\n🧪  Extractor test suite\n' + '─'.repeat(56))
 
   let passed = 0
   let failed = 0
@@ -168,17 +198,25 @@ async function run() {
   for (const tc of CASES) {
     process.stdout.write(`  ${tc.label}… `)
     try {
-      const got = await extractInvoice(tc.input, { defaultCurrency: tc.defaultCurrency })
-      const result = check(got, tc.expect)
+      const got = await extractInvoice(tc.input, {
+        defaultCurrency: tc.defaultCurrency,
+        userCountry: tc.userCountry,
+        today: '2026-04-29',
+      })
+      const failures = check(got, tc.expect)
 
-      if (result.pass) {
+      if (failures.length === 0) {
         console.log('✅  PASS')
+        if (got?.confidence) {
+          console.log(`      confidence: ${got.confidence.overall} | assumptions: ${got.confidence.assumptions.join('; ') || 'none'}`)
+        }
         passed++
       } else {
         console.log('❌  FAIL')
-        for (const r of result.reasons) console.log(`      • ${r}`)
+        for (const r of failures) console.log(`      • ${r}`)
         if (got) {
-          console.log(`      Got: ${JSON.stringify(got, null, 2).replace(/\n/g, '\n      ')}`)
+          const preview = JSON.stringify({ client: got.client, currency: got.currency, items: got.items, tax_rate: got.tax_rate, due_date: got.due_date, document_type: got.document_type })
+          console.log(`      Got: ${preview}`)
         }
         failed++
       }
@@ -189,8 +227,8 @@ async function run() {
     }
   }
 
-  console.log('\n' + '─'.repeat(50))
-  console.log(`  Results: ${passed}/${CASES.length} passed${failed > 0 ? `, ${failed} failed` : ''}`)
+  console.log('\n' + '─'.repeat(56))
+  console.log(`  Results: ${passed}/${CASES.length} passed${failed > 0 ? `, ${failed} failed` : ' 🎉'}`)
   console.log()
   process.exit(failed > 0 ? 1 : 0)
 }
