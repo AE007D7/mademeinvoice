@@ -1,7 +1,9 @@
 'use server'
 
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { checkInvoiceLimit } from '@/lib/subscription'
+import { PlanLimitError } from '@/lib/ai/errors'
 import { redirect } from 'next/navigation'
 
 export type LineItem = {
@@ -22,16 +24,16 @@ export type CreateInvoiceInput = {
   docType?: 'invoice' | 'estimation'
 }
 
-export async function createInvoiceAction(input: CreateInvoiceInput) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated.' }
-
-  const limit = await checkInvoiceLimit(supabase, user.id)
-  if (!limit.allowed) return { error: limit.reason }
+// ─── Core: no redirect, no auth — caller provides verified userId + supabase ───
+// Throws PlanLimitError if the monthly limit is reached.
+// Throws Error for any other DB failure.
+export async function createInvoiceCore(
+  input: CreateInvoiceInput,
+  userId: string,
+  supabase: SupabaseClient
+): Promise<{ id: string; share_token: string; invoice_number: string | null }> {
+  const limit = await checkInvoiceLimit(supabase, userId)
+  if (!limit.allowed) throw new PlanLimitError(limit.reason ?? 'Invoice limit reached.')
 
   const items = input.items.filter(
     (i) => i.description.trim() !== '' || i.price > 0
@@ -44,13 +46,12 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
   const taxAmount = subtotal * (input.taxRate / 100)
   const total = subtotal + taxAmount
 
-  // Get sequential invoice number atomically
-  const { data: numData } = await supabase.rpc('next_invoice_number', { p_user_id: user.id })
+  const { data: numData } = await supabase.rpc('next_invoice_number', { p_user_id: userId })
 
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .insert({
-      user_id: user.id,
+      user_id: userId,
       client_id: input.clientId || null,
       amount: subtotal,
       tax: input.taxRate,
@@ -64,11 +65,11 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
       document_type: input.docType ?? 'invoice',
       invoice_number: numData ?? null,
     })
-    .select()
+    .select('id, share_token, invoice_number')
     .single()
 
   if (invoiceError || !invoice) {
-    return { error: invoiceError?.message ?? 'Failed to create invoice.' }
+    throw new Error(invoiceError?.message ?? 'Failed to create invoice.')
   }
 
   if (items.length > 0) {
@@ -80,10 +81,35 @@ export async function createInvoiceAction(input: CreateInvoiceInput) {
         price: item.price,
       }))
     )
-    if (itemsError) return { error: itemsError.message }
+    if (itemsError) throw new Error(itemsError.message)
   }
 
-  redirect(`/invoices/${invoice.id}`)
+  return {
+    id: invoice.id,
+    share_token: invoice.share_token,
+    invoice_number: invoice.invoice_number,
+  }
+}
+
+// ─── Server action: auth → core → redirect ────────────────────────────────────
+export async function createInvoiceAction(input: CreateInvoiceInput) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  let invoiceId: string
+  try {
+    const invoice = await createInvoiceCore(input, user.id, supabase)
+    invoiceId = invoice.id
+  } catch (err) {
+    if (err instanceof PlanLimitError) return { error: err.message }
+    throw err
+  }
+
+  redirect(`/invoices/${invoiceId}`)
 }
 
 export type UpdateInvoiceInput = CreateInvoiceInput & { invoiceId: string }
