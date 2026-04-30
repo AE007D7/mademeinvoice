@@ -13,7 +13,9 @@ import { setUiLanguage } from '@/app/actions/language'
 type Branding = {
   company_name?: string | null
   logo_url?: string | null
+  logo_size?: string | null
   watermark_url?: string | null
+  stamp_url?: string | null
   phone?: string | null
   email?: string | null
   website?: string | null
@@ -45,7 +47,11 @@ export default function BrandingForm({ branding, userId, t }: Props) {
   const [invoiceLang, setInvoiceLang] = useState<LangCode>((branding?.invoice_language as LangCode) ?? 'en')
   const [uiLang, setUiLang] = useState<LangCode>((branding?.ui_language as LangCode) ?? 'en')
   const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoSize, setLogoSize] = useState<string>(branding?.logo_size ?? 'medium')
+  const [removeLogo, setRemoveLogo] = useState(false)
   const [watermarkFile, setWatermarkFile] = useState<File | null>(null)
+  const [stampFile, setStampFile] = useState<File | null>(null)
+  const [removeStamp, setRemoveStamp] = useState(false)
   const [isPending, setIsPending] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -67,26 +73,24 @@ export default function BrandingForm({ branding, userId, t }: Props) {
     setIsPending(true)
 
     const supabase = createClient()
-    let logoUrl = branding?.logo_url ?? null
+    let logoUrl = removeLogo ? null : (branding?.logo_url ?? null)
     let watermarkUrl = branding?.watermark_url ?? null
-    if (logoFile) {
+    let stampUrl = removeStamp ? null : (branding?.stamp_url ?? null)
+
+    if (!removeLogo && logoFile) {
       const path = await uploadFile('logos', logoFile)
-      if (!path) {
-        setError('Failed to upload logo.')
-        setIsPending(false)
-        return
-      }
+      if (!path) { setError('Failed to upload logo.'); setIsPending(false); return }
       logoUrl = path
     }
-
     if (watermarkFile) {
       const path = await uploadFile('watermarks', watermarkFile)
-      if (!path) {
-        setError('Failed to upload watermark.')
-        setIsPending(false)
-        return
-      }
+      if (!path) { setError('Failed to upload watermark.'); setIsPending(false); return }
       watermarkUrl = path
+    }
+    if (!removeStamp && stampFile) {
+      const path = await uploadFile('stamps', stampFile)
+      if (!path) { setError('Failed to upload stamp.'); setIsPending(false); return }
+      stampUrl = path
     }
 
     const { error } = await supabase.from('branding').upsert(
@@ -103,7 +107,9 @@ export default function BrandingForm({ branding, userId, t }: Props) {
         invoice_language: invoiceLang,
         ui_language: uiLang,
         logo_url: logoUrl,
+        logo_size: logoSize,
         watermark_url: watermarkUrl,
+        stamp_url: stampUrl,
       },
       { onConflict: 'user_id' }
     )
@@ -256,18 +262,50 @@ export default function BrandingForm({ branding, userId, t }: Props) {
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="logo">{t.logo}</Label>
-            <Input
-              id="logo"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
-              disabled={isPending}
-            />
-            {branding?.logo_url && (
-              <p className="text-xs text-muted-foreground">{t.logoHint}</p>
+            {!removeLogo && branding?.logo_url && (
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 px-3 py-2">
+                <span className="flex-1 text-xs text-muted-foreground">{t.logoHint}</span>
+                <button
+                  type="button"
+                  onClick={() => setRemoveLogo(true)}
+                  className="text-xs text-destructive hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
             )}
+            {removeLogo && (
+              <div className="flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2">
+                <span className="flex-1 text-xs text-destructive">Logo will be removed on save</span>
+                <button type="button" onClick={() => setRemoveLogo(false)} className="text-xs text-muted-foreground hover:underline">Undo</button>
+              </div>
+            )}
+            {!removeLogo && (
+              <Input
+                id="logo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => { setLogoFile(e.target.files?.[0] ?? null) }}
+                disabled={isPending}
+              />
+            )}
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Logo size</Label>
+              <div className="grid grid-cols-3 gap-1 rounded-lg border border-input bg-muted/40 p-1">
+                {(['small', 'medium', 'large'] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setLogoSize(s)}
+                    className={`rounded-md py-1 text-xs font-medium capitalize transition-colors ${logoSize === s ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="space-y-1.5">
@@ -283,6 +321,32 @@ export default function BrandingForm({ branding, userId, t }: Props) {
               <p className="text-xs text-muted-foreground">{t.logoHint}</p>
             )}
             <p className="text-xs text-muted-foreground">{t.watermarkHint}</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="stamp">Company Stamp</Label>
+            {!removeStamp && branding?.stamp_url && (
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 px-3 py-2">
+                <span className="flex-1 text-xs text-muted-foreground">Stamp uploaded</span>
+                <button type="button" onClick={() => setRemoveStamp(true)} className="text-xs text-destructive hover:underline">Remove</button>
+              </div>
+            )}
+            {removeStamp && (
+              <div className="flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2">
+                <span className="flex-1 text-xs text-destructive">Stamp will be removed on save</span>
+                <button type="button" onClick={() => setRemoveStamp(false)} className="text-xs text-muted-foreground hover:underline">Undo</button>
+              </div>
+            )}
+            {!removeStamp && (
+              <Input
+                id="stamp"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setStampFile(e.target.files?.[0] ?? null)}
+                disabled={isPending}
+              />
+            )}
+            <p className="text-xs text-muted-foreground">Appears on invoices — use a PNG with a transparent background.</p>
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}

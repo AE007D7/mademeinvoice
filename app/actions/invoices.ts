@@ -17,6 +17,7 @@ export type CreateInvoiceInput = {
   currency: string
   taxRate: number
   items: LineItem[]
+  invoiceDate?: string | null
   dueDate?: string | null
   notes?: string | null
   template?: string
@@ -58,6 +59,7 @@ export async function createInvoiceCore(
       total,
       currency: input.currency,
       status: 'draft',
+      invoice_date: input.invoiceDate || null,
       due_date: input.dueDate || null,
       notes: input.notes || null,
       template: input.template ?? 'modern',

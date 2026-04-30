@@ -12,6 +12,7 @@ type LineItem = {
 type Client = {
   name: string
   email?: string | null
+  phone?: string | null
   address?: string | null
 } | null
 
@@ -34,7 +35,9 @@ type Invoice = {
 type Branding = {
   company_name?: string | null
   logo_url?: string | null
+  logo_size?: string | null
   watermark_url?: string | null
+  stamp_url?: string | null
   phone?: string | null
   email?: string | null
   website?: string | null
@@ -52,9 +55,10 @@ type Props = {
   branding: Branding
   logoSignedUrl?: string | null
   watermarkSignedUrl?: string | null
+  stampSignedUrl?: string | null
 }
 
-export default function InvoicePreview({ invoice, items, client, branding, logoSignedUrl, watermarkSignedUrl }: Props) {
+export default function InvoicePreview({ invoice, items, client, branding, logoSignedUrl, watermarkSignedUrl, stampSignedUrl }: Props) {
   const subtotal = items.reduce((s, i) => s + i.quantity * i.price, 0)
   const taxAmount = subtotal * (Number(invoice.tax) / 100)
 
@@ -79,7 +83,9 @@ export default function InvoicePreview({ invoice, items, client, branding, logoS
     notes: invoice.notes,
     clientName: client?.name ?? '',
     clientEmail: client?.email,
+    clientPhone: client?.phone ?? undefined,
     clientAddress: client?.address,
+    logoSize: branding?.logo_size ?? 'medium',
     items: items.map((i) => ({ ...i, price: Number(i.price) })),
     currency: invoice.currency,
     taxRate: Number(invoice.tax),
@@ -102,6 +108,16 @@ export default function InvoicePreview({ invoice, items, client, branding, logoS
           src={watermarkSignedUrl}
           alt=""
           className="invoice-watermark pointer-events-none select-none"
+        />
+      )}
+      {/* Stamp */}
+      {stampSignedUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={stampSignedUrl}
+          alt=""
+          className="pointer-events-none select-none"
+          style={{ position: 'absolute', bottom: 72, right: 52, width: 130, height: 130, objectFit: 'contain', opacity: 0.85, transform: 'rotate(-10deg)', zIndex: 20 }}
         />
       )}
       <div className="relative z-10">

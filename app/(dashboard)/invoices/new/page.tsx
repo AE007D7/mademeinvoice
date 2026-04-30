@@ -12,7 +12,7 @@ export default async function NewInvoicePage({ searchParams }: { searchParams: S
 
   const [clientsRes, brandingRes, productsRes] = await Promise.all([
     supabase.from('clients').select('id, name, email, address').eq('user_id', user.id).order('name'),
-    supabase.from('branding').select('company_name, logo_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', user.id).single(),
+    supabase.from('branding').select('company_name, logo_url, logo_size, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', user.id).single(),
     supabase.from('products').select('id, name, description, price, unit').eq('user_id', user.id).order('name'),
   ])
 

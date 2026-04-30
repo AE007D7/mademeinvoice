@@ -21,7 +21,7 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
 
   const [itemsRes, brandingRes] = await Promise.all([
     supabase.from('invoice_items').select('*').eq('invoice_id', invoice.id).order('id'),
-    supabase.from('branding').select('company_name, logo_url, watermark_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', invoice.user_id).single(),
+    supabase.from('branding').select('company_name, logo_url, logo_size, watermark_url, stamp_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', invoice.user_id).single(),
   ])
 
   const branding = brandingRes.data ?? null

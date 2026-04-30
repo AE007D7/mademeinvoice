@@ -30,13 +30,13 @@ export default async function InvoicePage({ params }: { params: Params }) {
       .eq('user_id', user.id)
       .single(),
     supabase.from('invoice_items').select('*').eq('invoice_id', id).order('id'),
-    supabase.from('branding').select('company_name, logo_url, watermark_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', user.id).single(),
+    supabase.from('branding').select('company_name, logo_url, logo_size, watermark_url, stamp_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', user.id).single(),
   ])
 
   if (!invoiceRes.data) notFound()
 
   const invoice = invoiceRes.data
-  const rawClient = invoice.clients as { name: string; email?: string | null; address?: string | null } | null
+  const rawClient = invoice.clients as { name: string; email?: string | null; phone?: string | null; address?: string | null } | null
 
   const items = (itemsRes.data ?? []).map((item) => ({
     id: item.id,
@@ -57,6 +57,12 @@ export default async function InvoicePage({ params }: { params: Params }) {
   if (branding?.logo_url) {
     const { data } = await supabase.storage.from('logos').createSignedUrl(branding.logo_url, 3600)
     logoSignedUrl = data?.signedUrl ?? null
+  }
+
+  let stampSignedUrl: string | null = null
+  if (branding?.stamp_url) {
+    const { data } = await supabase.storage.from('stamps').createSignedUrl(branding.stamp_url, 3600)
+    stampSignedUrl = data?.signedUrl ?? null
   }
 
   const invoiceLabel = invoice.invoice_number ?? `#${invoice.id.slice(0, 8).toUpperCase()}`
@@ -113,7 +119,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
             total: Number(invoice.total),
             currency: invoice.currency,
             status: invoice.status,
-            created_at: invoice.created_at,
+            created_at: invoice.invoice_date ? invoice.invoice_date + 'T00:00:00' : invoice.created_at,
             due_date: invoice.due_date ?? null,
             notes: invoice.notes ?? null,
             template: invoice.template ?? 'modern',
@@ -125,6 +131,7 @@ export default async function InvoicePage({ params }: { params: Params }) {
           branding={branding}
           logoSignedUrl={logoSignedUrl}
           watermarkSignedUrl={watermarkSignedUrl}
+          stampSignedUrl={stampSignedUrl}
         />
       </div>
     </div>

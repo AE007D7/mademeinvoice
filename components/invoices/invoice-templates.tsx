@@ -6,6 +6,7 @@ export type TemplateId = 'classic' | 'modern' | 'minimal' | 'bold' | 'stripe' | 
 export type TemplateData = {
   companyName: string
   logoUrl?: string | null
+  logoSize?: string | null
   companyPhone?: string | null
   companyEmail?: string | null
   companyWebsite?: string | null
@@ -16,6 +17,7 @@ export type TemplateData = {
   notes?: string | null
   clientName: string
   clientEmail?: string | null
+  clientPhone?: string | null
   clientAddress?: string | null
   items: Array<{ id: string; description: string; quantity: number; price: number }>
   currency: string
@@ -30,6 +32,12 @@ export type TemplateData = {
   paymentRib?: string | null
   paymentPaypal?: string | null
   lang?: string | null
+}
+
+function logoH(size?: string | null): number {
+  if (size === 'small') return 40
+  if (size === 'large') return 104
+  return 65
 }
 
 // ─── shared helpers ───────────────────────────────────────────────────────────
@@ -114,7 +122,7 @@ export function ClassicTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="mb-1 h-[73px] w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="mb-1 w-auto object-contain" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="text-xl font-bold tracking-tight">{d.companyName}</p>
             )}
@@ -134,6 +142,7 @@ export function ClassicTemplate(d: TemplateData) {
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.billTo}</p>
           <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
           {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
+          {d.clientPhone && <p className="text-sm text-gray-500">{d.clientPhone}</p>}
           {d.clientAddress && <p className="whitespace-pre-line text-sm text-gray-500">{d.clientAddress}</p>}
         </div>
         {d.logoUrl && d.companyName && (
@@ -211,7 +220,7 @@ export function ModernTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-[62px] w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="w-auto object-contain brightness-0 invert" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="text-lg font-bold text-white/90">{d.companyName}</p>
             )}
@@ -230,6 +239,7 @@ export function ModernTemplate(d: TemplateData) {
           <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.billTo}</p>
           <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
           {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
+          {d.clientPhone && <p className="text-sm text-gray-500">{d.clientPhone}</p>}
           {d.clientAddress && <p className="whitespace-pre-line text-sm text-gray-500">{d.clientAddress}</p>}
         </div>
       </div>
@@ -300,7 +310,7 @@ export function MinimalTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-[83px] w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="w-auto object-contain" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-gray-400">{d.companyName}</p>
             )}
@@ -316,6 +326,7 @@ export function MinimalTemplate(d: TemplateData) {
           <div>
             <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
             {d.clientEmail && <p className="text-gray-400">{d.clientEmail}</p>}
+            {d.clientPhone && <p className="text-gray-400">{d.clientPhone}</p>}
             {d.clientAddress && <p className="whitespace-pre-line text-gray-400">{d.clientAddress}</p>}
           </div>
           <div className="text-right">
@@ -385,7 +396,7 @@ export function BoldTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="mb-2 h-[62px] w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="mb-2 w-auto object-contain brightness-0 invert" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-white/70">{d.companyName}</p>
             )}
@@ -484,7 +495,7 @@ export function StripeTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-[73px] w-auto object-contain mb-1" />
+              <img src={d.logoUrl} alt="logo" className="w-auto object-contain mb-1" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="text-xl font-bold tracking-tight text-gray-900">{d.companyName}</p>
             )}
@@ -510,6 +521,7 @@ export function StripeTemplate(d: TemplateData) {
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: d.accentColor }}>{t.billTo}</p>
           <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
           {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
+          {d.clientPhone && <p className="text-sm text-gray-500">{d.clientPhone}</p>}
           {d.clientAddress && <p className="whitespace-pre-line text-sm text-gray-500">{d.clientAddress}</p>}
         </div>
 
@@ -582,7 +594,7 @@ export function RuledTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-[73px] w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="w-auto object-contain" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="text-2xl font-black tracking-tight text-gray-900">{d.companyName}</p>
             )}
@@ -611,6 +623,7 @@ export function RuledTemplate(d: TemplateData) {
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.billTo}</p>
           <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
           {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
+          {d.clientPhone && <p className="text-sm text-gray-500">{d.clientPhone}</p>}
           {d.clientAddress && <p className="whitespace-pre-line text-sm text-gray-500">{d.clientAddress}</p>}
         </div>
 
@@ -687,7 +700,7 @@ export function CorporateTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-[62px] w-auto object-contain brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="w-auto object-contain brightness-0 invert" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="text-xl font-black uppercase tracking-wider text-white">{d.companyName}</p>
             )}
@@ -705,6 +718,7 @@ export function CorporateTemplate(d: TemplateData) {
           <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{t.billTo}</p>
           <p className="font-semibold text-gray-900 text-sm">{d.clientName || 'Client Name'}</p>
           {d.clientEmail && <p className="text-xs text-gray-500">{d.clientEmail}</p>}
+          {d.clientPhone && <p className="text-xs text-gray-500">{d.clientPhone}</p>}
           {d.clientAddress && <p className="whitespace-pre-line text-xs text-gray-500">{d.clientAddress}</p>}
         </div>
         <div className="border-r border-gray-200 px-6 py-4">
@@ -797,7 +811,7 @@ export function NoirTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-[52px] w-auto object-contain mb-1 brightness-0 invert" />
+              <img src={d.logoUrl} alt="logo" className="w-auto object-contain mb-1 brightness-0 invert" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="text-xl font-bold tracking-tight" style={{ color: '#f8fafc' }}>{d.companyName}</p>
             )}
@@ -824,6 +838,7 @@ export function NoirTemplate(d: TemplateData) {
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: d.accentColor }}>{t.billTo}</p>
           <p className="font-semibold" style={{ color: '#f8fafc' }}>{d.clientName || 'Client Name'}</p>
           {d.clientEmail && <p className="text-sm" style={{ color: sub }}>{d.clientEmail}</p>}
+          {d.clientPhone && <p className="text-sm" style={{ color: sub }}>{d.clientPhone}</p>}
           {d.clientAddress && <p className="whitespace-pre-line text-sm" style={{ color: muted }}>{d.clientAddress}</p>}
         </div>
 
@@ -904,7 +919,7 @@ export function StudioTemplate(d: TemplateData) {
         <div className="mb-8">
           {d.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={d.logoUrl} alt="logo" className="h-[52px] w-auto object-contain mb-1 brightness-0 invert" />
+            <img src={d.logoUrl} alt="logo" className="w-auto object-contain mb-1 brightness-0 invert" style={{ height: logoH(d.logoSize) }} />
           ) : (
             <p className="text-base font-black leading-tight" style={{ color: '#fff' }}>{d.companyName}</p>
           )}
@@ -964,6 +979,7 @@ export function StudioTemplate(d: TemplateData) {
           <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.billTo}</p>
           <p className="font-semibold text-gray-900">{d.clientName || 'Client Name'}</p>
           {d.clientEmail && <p className="text-sm text-gray-500">{d.clientEmail}</p>}
+          {d.clientPhone && <p className="text-sm text-gray-500">{d.clientPhone}</p>}
           {d.clientAddress && <p className="whitespace-pre-line text-sm text-gray-500">{d.clientAddress}</p>}
         </div>
 
@@ -1041,7 +1057,7 @@ export function LuxeTemplate(d: TemplateData) {
           <div>
             {d.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={d.logoUrl} alt="logo" className="h-[83px] w-auto object-contain" />
+              <img src={d.logoUrl} alt="logo" className="w-auto object-contain" style={{ height: logoH(d.logoSize) }} />
             ) : (
               <p className="text-2xl font-black tracking-tight text-gray-900">{d.companyName}</p>
             )}

@@ -69,12 +69,16 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
   const [isPending, setIsPending] = useState(false)
   // eslint-disable-next-line react-hooks/purity
   const [invoiceNumber] = useState(`INV-${Date.now().toString().slice(-6)}`)
-  const [issueDate] = useState(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }))
+  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0])
 
   const subtotal = items.reduce((s, i) => s + i.quantity * i.price, 0)
   const taxAmount = subtotal * (taxRate / 100)
   const total = subtotal + taxAmount
   const selectedClient = clients.find((c) => c.id === clientId) ?? null
+  const issueDateFormatted = new Date(invoiceDate + 'T00:00:00').toLocaleDateString(
+    invoiceLang === 'fr' ? 'fr-FR' : invoiceLang === 'es' ? 'es-ES' : invoiceLang === 'de' ? 'de-DE' : invoiceLang === 'ar' ? 'ar-SA' : invoiceLang === 'pt' ? 'pt-PT' : invoiceLang === 'it' ? 'it-IT' : 'en-US',
+    { year: 'numeric', month: 'long', day: 'numeric' }
+  )
   const dueDateFormatted = dueDate
     ? new Date(dueDate + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : undefined
@@ -87,6 +91,7 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
       clientId: clientId || null,
       currency,
       taxRate,
+      invoiceDate: invoiceDate || null,
       dueDate: dueDate || null,
       notes: notes || null,
       template,
@@ -115,7 +120,7 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
     paymentPaypal: paymentPaypal ?? undefined,
     lang: invoiceLang ?? 'en',
     invoiceNumber,
-    issueDate,
+    issueDate: issueDateFormatted,
     dueDate: dueDateFormatted,
     notes: notes || null,
     clientName: selectedClient?.name ?? '',
@@ -191,9 +196,15 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="dueDate">Due Date <span className="text-muted-foreground">(optional)</span></Label>
-        <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="invoiceDate">Invoice Date</Label>
+          <Input id="invoiceDate" type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="dueDate">Due Date <span className="text-muted-foreground">(optional)</span></Label>
+          <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+        </div>
       </div>
 
       <Card style={{ overflow: 'visible' }}>
