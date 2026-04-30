@@ -5,7 +5,8 @@ import { getUiLang } from '@/lib/get-lang'
 import { getUiT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Mail, MapPin, Pencil, Plus } from 'lucide-react'
+import { ArrowLeft, Mail, MapPin, Phone, Pencil, Plus } from 'lucide-react'
+import { formatDate } from '@/lib/format-date'
 
 type Params = Promise<{ id: string }>
 
@@ -71,6 +72,12 @@ export default async function ClientDetailPage({ params }: { params: Params }) {
               <p className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="h-3.5 w-3.5 shrink-0" />
                 <a href={`mailto:${client.email}`} className="hover:text-foreground transition-colors">{client.email}</a>
+              </p>
+            )}
+            {client.phone && (
+              <p className="flex items-center gap-2 text-muted-foreground">
+                <Phone className="h-3.5 w-3.5 shrink-0" />
+                <a href={`tel:${client.phone}`} className="hover:text-foreground transition-colors">{client.phone}</a>
               </p>
             )}
             {client.address && (
@@ -142,7 +149,7 @@ export default async function ClientDetailPage({ params }: { params: Params }) {
                           {inv.invoice_number ?? '#' + inv.id.slice(0, 8).toUpperCase()}
                         </td>
                         <td className="py-3 pr-4 text-muted-foreground">
-                          {new Date(inv.created_at).toLocaleDateString()}
+                          {formatDate(inv.created_at, lang)}
                         </td>
                         <td className="py-3 pr-4 font-medium">
                           {inv.currency} {Number(inv.total).toFixed(2)}

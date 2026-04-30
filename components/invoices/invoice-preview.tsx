@@ -1,4 +1,6 @@
 import { TemplateRenderer, type TemplateId, type TemplateData } from './invoice-templates'
+import { formatDateLong } from '@/lib/format-date'
+import type { LangCode } from '@/lib/i18n'
 
 type LineItem = {
   id: string
@@ -56,14 +58,9 @@ export default function InvoicePreview({ invoice, items, client, branding, logoS
   const subtotal = items.reduce((s, i) => s + i.quantity * i.price, 0)
   const taxAmount = subtotal * (Number(invoice.tax) / 100)
 
-  const issueDate = new Date(invoice.created_at).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
-  const dueDate = invoice.due_date
-    ? new Date(invoice.due_date + 'T00:00:00').toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
-      })
-    : null
+  const invoiceLang = (branding?.invoice_language ?? 'en') as LangCode
+  const issueDate = formatDateLong(invoice.created_at, invoiceLang)
+  const dueDate = invoice.due_date ? formatDateLong(invoice.due_date + 'T00:00:00', invoiceLang) : null
 
   const data: TemplateData = {
     companyName: branding?.company_name ?? 'Made Me Invoice',

@@ -12,6 +12,7 @@ type ClientData = {
   id: string
   name: string
   email: string | null
+  phone: string | null
   address: string | null
 }
 
@@ -19,6 +20,7 @@ export default function EditClientForm({ client }: { client: ClientData }) {
   const router = useRouter()
   const [name, setName]       = useState(client.name)
   const [email, setEmail]     = useState(client.email ?? '')
+  const [phone, setPhone]     = useState(client.phone ?? '')
   const [address, setAddress] = useState(client.address ?? '')
   const [error, setError]     = useState('')
   const [isPending, setIsPending] = useState(false)
@@ -35,6 +37,7 @@ export default function EditClientForm({ client }: { client: ClientData }) {
       .update({
         name:    name.trim(),
         email:   email.trim() || null,
+        phone:   phone.trim() || null,
         address: address.trim() || null,
       })
       .eq('id', client.id)
@@ -74,6 +77,17 @@ export default function EditClientForm({ client }: { client: ClientData }) {
               placeholder="billing@acme.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isPending}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="+1 555 000 0000"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               disabled={isPending}
             />
           </div>

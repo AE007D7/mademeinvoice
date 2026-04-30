@@ -13,7 +13,7 @@ export default async function EditClientPage({ params }: { params: Params }) {
 
   const { data: client } = await supabase
     .from('clients')
-    .select('id, name, email, address')
+    .select('id, name, email, phone, address')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()

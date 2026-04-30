@@ -5,6 +5,7 @@ import { getUiT } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus } from 'lucide-react'
+import { formatDate } from '@/lib/format-date'
 
 const STATUS_BADGE: Record<string, string> = {
   draft:   'bg-muted text-muted-foreground',
@@ -69,7 +70,7 @@ export default async function EstimationsPage() {
                           {client?.name ?? '—'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(est.created_at).toLocaleDateString()} &middot; {est.invoice_number ?? '#' + est.id.slice(0, 6).toUpperCase()}
+                          {formatDate(est.created_at, lang)} &middot; {est.invoice_number ?? '#' + est.id.slice(0, 6).toUpperCase()}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
@@ -112,7 +113,7 @@ export default async function EstimationsPage() {
                           </td>
                           <td className="py-3 pr-4 font-medium">{client?.name ?? '—'}</td>
                           <td className="py-3 pr-4 text-muted-foreground">
-                            {new Date(est.created_at).toLocaleDateString()}
+                            {formatDate(est.created_at, lang)}
                           </td>
                           <td className="py-3 pr-4 font-medium">
                             {est.currency} {Number(est.total).toFixed(2)}

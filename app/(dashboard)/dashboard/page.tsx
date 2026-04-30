@@ -6,6 +6,7 @@ import { isTrialActive } from '@/lib/subscription'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DollarSign, Clock, Users, FileText, AlertTriangle } from 'lucide-react'
+import { formatDate } from '@/lib/format-date'
 
 const STATUS_BADGE: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -151,7 +152,7 @@ export default async function DashboardPage() {
                           </span>
                         </td>
                         <td className="hidden py-2 pr-4 text-muted-foreground sm:table-cell">
-                          {new Date(invoice.created_at).toLocaleDateString()}
+                          {formatDate(invoice.created_at, lang)}
                         </td>
                         <td className="py-2 text-right">
                           <Button variant="ghost" size="sm" render={<Link href={`/invoices/${invoice.id}`} />}>

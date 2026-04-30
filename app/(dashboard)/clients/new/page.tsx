@@ -12,6 +12,7 @@ export default function NewClientPage() {
   const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [error, setError] = useState('')
   const [isPending, setIsPending] = useState(false)
@@ -40,6 +41,7 @@ export default function NewClientPage() {
       user_id: user.id,
       name: name.trim(),
       email: email.trim() || null,
+      phone: phone.trim() || null,
       address: address.trim() || null,
     })
 
@@ -87,6 +89,17 @@ export default function NewClientPage() {
                 placeholder="billing@acme.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isPending}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+1 555 000 0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 disabled={isPending}
               />
             </div>

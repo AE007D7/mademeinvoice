@@ -48,6 +48,7 @@ export default async function ClientsPage() {
                   <tr className="border-b border-border text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     <th className="pb-2 pr-4">{t.clients.colName}</th>
                     <th className="pb-2 pr-4">{t.clients.colEmail}</th>
+                    <th className="pb-2 pr-4">{t.clients.colPhone}</th>
                     <th className="pb-2 pr-4">{t.clients.colAddress}</th>
                     <th className="pb-2" />
                   </tr>
@@ -59,6 +60,7 @@ export default async function ClientsPage() {
                         <Link href={`/clients/${client.id}`} className="hover:underline underline-offset-2">{client.name}</Link>
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">{client.email ?? '—'}</td>
+                      <td className="py-3 pr-4 text-muted-foreground">{client.phone ?? '—'}</td>
                       <td className="py-3 pr-4 text-muted-foreground">{client.address ?? '—'}</td>
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-1">

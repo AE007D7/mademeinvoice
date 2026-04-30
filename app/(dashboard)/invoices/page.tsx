@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus } from 'lucide-react'
 import { MarkPaidButton } from './mark-paid-button'
 import { StatusFilter } from './status-filter'
+import { formatDate } from '@/lib/format-date'
 
 const STATUS_BADGE: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -85,7 +86,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
                           {client?.name ?? '—'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(inv.created_at).toLocaleDateString()} &middot; {inv.invoice_number ?? '#' + inv.id.slice(0, 6).toUpperCase()}
+                          {formatDate(inv.created_at, lang)} &middot; {inv.invoice_number ?? '#' + inv.id.slice(0, 6).toUpperCase()}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
@@ -131,7 +132,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
                           </td>
                           <td className="py-3 pr-4 font-medium">{client?.name ?? '—'}</td>
                           <td className="py-3 pr-4 text-muted-foreground">
-                            {new Date(inv.created_at).toLocaleDateString()}
+                            {formatDate(inv.created_at, lang)}
                           </td>
                           <td className="py-3 pr-4 font-medium">
                             {inv.currency} {Number(inv.total).toFixed(2)}
