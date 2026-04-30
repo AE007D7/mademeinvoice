@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { TemplateRenderer, type TemplateId, type TemplateData } from '@/components/invoices/invoice-templates'
+import InvoicePreview from '@/components/invoices/invoice-preview'
 import { PrintButton } from '@/components/invoices/print-button'
 import { DownloadButtons } from '@/components/invoices/download-buttons'
 import { FileText } from 'lucide-react'
@@ -13,7 +13,7 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
 
   const { data: invoice } = await supabase
     .from('invoices')
-    .select('*, clients(name, email, address)')
+    .select('*, clients(name, email, phone, address)')
     .eq('share_token', token)
     .single()
 
@@ -21,7 +21,11 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
 
   const [itemsRes, brandingRes] = await Promise.all([
     supabase.from('invoice_items').select('*').eq('invoice_id', invoice.id).order('id'),
-    supabase.from('branding').select('company_name, logo_url, logo_size, watermark_url, stamp_url, phone, email, website, address, iban, rib, paypal, invoice_language').eq('user_id', invoice.user_id).single(),
+    supabase
+      .from('branding')
+      .select('company_name, logo_url, logo_size, watermark_url, stamp_url, phone, email, website, address, iban, rib, paypal, invoice_language')
+      .eq('user_id', invoice.user_id)
+      .single(),
   ])
 
   const branding = brandingRes.data ?? null
@@ -34,52 +38,22 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
 
   let logoSignedUrl: string | null = null
   let watermarkSignedUrl: string | null = null
+  let stampSignedUrl: string | null = null
 
-  if (branding?.logo_url) {
-    const { data } = await supabase.storage.from('logos').createSignedUrl(branding.logo_url, 3600)
-    logoSignedUrl = data?.signedUrl ?? null
-  }
-  if (branding?.watermark_url) {
-    const { data } = await supabase.storage.from('watermarks').createSignedUrl(branding.watermark_url, 3600)
-    watermarkSignedUrl = data?.signedUrl ?? null
-  }
+  await Promise.all([
+    branding?.logo_url
+      ? supabase.storage.from('logos').createSignedUrl(branding.logo_url, 3600).then(({ data }) => { logoSignedUrl = data?.signedUrl ?? null })
+      : null,
+    branding?.watermark_url
+      ? supabase.storage.from('watermarks').createSignedUrl(branding.watermark_url, 3600).then(({ data }) => { watermarkSignedUrl = data?.signedUrl ?? null })
+      : null,
+    branding?.stamp_url
+      ? supabase.storage.from('stamps').createSignedUrl(branding.stamp_url, 3600).then(({ data }) => { stampSignedUrl = data?.signedUrl ?? null })
+      : null,
+  ])
 
-  const client = invoice.clients as { name: string; email?: string | null; address?: string | null } | null
-  const subtotal = items.reduce((s, i) => s + i.quantity * i.price, 0)
-  const taxAmount = subtotal * (Number(invoice.tax) / 100)
-
-  const issueDate = new Date(invoice.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-  const dueDate = invoice.due_date
-    ? new Date(invoice.due_date + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : null
-
-  const data: TemplateData = {
-    companyName: branding?.company_name ?? 'Made Me Invoice',
-    logoUrl: logoSignedUrl ?? undefined,
-    companyPhone: branding?.phone ?? undefined,
-    companyEmail: branding?.email ?? undefined,
-    companyWebsite: branding?.website ?? undefined,
-    companyAddress: branding?.address ?? undefined,
-    paymentIban: branding?.iban ?? undefined,
-    paymentRib: branding?.rib ?? undefined,
-    paymentPaypal: branding?.paypal ?? undefined,
-    lang: branding?.invoice_language ?? 'en',
-    invoiceNumber: invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase(),
-    issueDate,
-    dueDate,
-    notes: invoice.notes,
-    clientName: client?.name ?? '',
-    clientEmail: client?.email,
-    clientAddress: client?.address,
-    items,
-    currency: invoice.currency,
-    taxRate: Number(invoice.tax),
-    subtotal,
-    taxAmount,
-    total: Number(invoice.total),
-    accentColor: invoice.accent_color ?? '#6366f1',
-    status: invoice.status,
-  }
+  const client = invoice.clients as { name: string; email?: string | null; phone?: string | null; address?: string | null } | null
+  const showWatermark = invoice.show_watermark ?? true
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -101,14 +75,32 @@ export default async function PublicInvoicePage({ params }: { params: Params }) 
 
       {/* Invoice */}
       <div className="overflow-x-auto p-4 sm:p-8">
-        <div id="invoice-preview" className="invoice-print-area relative mx-auto w-[794px] max-w-full overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-border print:w-full print:max-w-none print:rounded-none print:shadow-none print:ring-0">
-          {watermarkSignedUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={watermarkSignedUrl} alt="" className="invoice-watermark pointer-events-none select-none" />
-          )}
-          <div className="relative z-10">
-            <TemplateRenderer templateId={(invoice.template ?? 'modern') as TemplateId} data={data} />
-          </div>
+        <div id="invoice-preview">
+          <InvoicePreview
+            invoice={{
+              id: invoice.id,
+              invoice_number: invoice.invoice_number ?? null,
+              amount: Number(invoice.amount),
+              tax: Number(invoice.tax),
+              total: Number(invoice.total),
+              currency: invoice.currency,
+              status: invoice.status,
+              created_at: invoice.invoice_date ? invoice.invoice_date + 'T00:00:00' : invoice.created_at,
+              due_date: invoice.due_date ?? null,
+              notes: invoice.notes ?? null,
+              template: invoice.template ?? 'modern',
+              accent_color: invoice.accent_color ?? '#6366f1',
+              document_type: invoice.document_type ?? 'invoice',
+            }}
+            items={items}
+            client={client}
+            branding={branding}
+            logoSignedUrl={logoSignedUrl}
+            watermarkSignedUrl={showWatermark ? watermarkSignedUrl : null}
+            stampSignedUrl={stampSignedUrl}
+            stampX={invoice.stamp_x ?? 75}
+            stampY={invoice.stamp_y ?? 82}
+          />
         </div>
       </div>
     </div>

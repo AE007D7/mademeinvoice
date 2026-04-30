@@ -151,6 +151,9 @@
   animation: chat-pulse 2s ease-in-out infinite;
 }
 
+/* Watermark visibility toggle */
+[data-hide-watermark] .invoice-watermark { opacity: 0 !important; }
+
 /* Watermark — screen view */
 .invoice-print-area .invoice-watermark {
   position: absolute;

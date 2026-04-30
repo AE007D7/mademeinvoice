@@ -55,10 +55,13 @@ type Props = {
   branding: Branding
   logoSignedUrl?: string | null
   watermarkSignedUrl?: string | null
+  // stampSignedUrl handled by InvoiceOverlay on dashboard; passed here for static views (public, print)
   stampSignedUrl?: string | null
+  stampX?: number  // percentage 0-100
+  stampY?: number  // percentage 0-100
 }
 
-export default function InvoicePreview({ invoice, items, client, branding, logoSignedUrl, watermarkSignedUrl, stampSignedUrl }: Props) {
+export default function InvoicePreview({ invoice, items, client, branding, logoSignedUrl, watermarkSignedUrl, stampSignedUrl, stampX = 75, stampY = 82 }: Props) {
   const subtotal = items.reduce((s, i) => s + i.quantity * i.price, 0)
   const taxAmount = subtotal * (Number(invoice.tax) / 100)
 
@@ -110,14 +113,14 @@ export default function InvoicePreview({ invoice, items, client, branding, logoS
           className="invoice-watermark pointer-events-none select-none"
         />
       )}
-      {/* Stamp */}
+      {/* Stamp — static positioning for public/print views; dashboard uses InvoiceOverlay instead */}
       {stampSignedUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={stampSignedUrl}
           alt=""
           className="pointer-events-none select-none"
-          style={{ position: 'absolute', bottom: 72, right: 52, width: 130, height: 130, objectFit: 'contain', opacity: 0.85, transform: 'rotate(-10deg)', zIndex: 20 }}
+          style={{ position: 'absolute', left: `calc(${stampX}% - 65px)`, top: `calc(${stampY}% - 65px)`, width: 130, height: 130, objectFit: 'contain', opacity: 0.85, transform: 'rotate(-10deg)', zIndex: 20 }}
         />
       )}
       <div className="relative z-10">

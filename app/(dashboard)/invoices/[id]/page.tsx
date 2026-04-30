@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import InvoicePreview from '@/components/invoices/invoice-preview'
+import InvoiceOverlay from '@/components/invoices/invoice-overlay'
 import { PrintButton } from '@/components/invoices/print-button'
 import { DownloadButtons } from '@/components/invoices/download-buttons'
 import { StatusActions } from './status-actions'
@@ -110,29 +111,38 @@ export default async function InvoicePage({ params }: { params: Params }) {
 
       {/* Preview */}
       <div id="invoice-preview" className="overflow-x-auto min-w-0">
-        <InvoicePreview
-          invoice={{
-            id: invoice.id,
-            invoice_number: invoice.invoice_number ?? null,
-            amount: Number(invoice.amount),
-            tax: Number(invoice.tax),
-            total: Number(invoice.total),
-            currency: invoice.currency,
-            status: invoice.status,
-            created_at: invoice.invoice_date ? invoice.invoice_date + 'T00:00:00' : invoice.created_at,
-            due_date: invoice.due_date ?? null,
-            notes: invoice.notes ?? null,
-            template: invoice.template ?? 'modern',
-            accent_color: invoice.accent_color ?? '#6366f1',
-            document_type: invoice.document_type ?? 'invoice',
-          }}
-          items={items}
-          client={rawClient}
-          branding={branding}
-          logoSignedUrl={logoSignedUrl}
-          watermarkSignedUrl={watermarkSignedUrl}
-          stampSignedUrl={stampSignedUrl}
-        />
+        <InvoiceOverlay
+          invoiceId={id}
+          stampUrl={stampSignedUrl}
+          initialX={invoice.stamp_x ?? 75}
+          initialY={invoice.stamp_y ?? 82}
+          initialShowWatermark={invoice.show_watermark ?? true}
+          hasWatermark={!!watermarkSignedUrl}
+        >
+          <InvoicePreview
+            invoice={{
+              id: invoice.id,
+              invoice_number: invoice.invoice_number ?? null,
+              amount: Number(invoice.amount),
+              tax: Number(invoice.tax),
+              total: Number(invoice.total),
+              currency: invoice.currency,
+              status: invoice.status,
+              created_at: invoice.invoice_date ? invoice.invoice_date + 'T00:00:00' : invoice.created_at,
+              due_date: invoice.due_date ?? null,
+              notes: invoice.notes ?? null,
+              template: invoice.template ?? 'modern',
+              accent_color: invoice.accent_color ?? '#6366f1',
+              document_type: invoice.document_type ?? 'invoice',
+            }}
+            items={items}
+            client={rawClient}
+            branding={branding}
+            logoSignedUrl={logoSignedUrl}
+            watermarkSignedUrl={watermarkSignedUrl}
+            stampSignedUrl={null}
+          />
+        </InvoiceOverlay>
       </div>
     </div>
   )

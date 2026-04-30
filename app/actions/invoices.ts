@@ -262,3 +262,17 @@ export async function updateInvoiceStatus(invoiceId: string, status: string) {
   if (error) return { error: error.message }
   return { success: true }
 }
+
+export async function saveStampPosition(invoiceId: string, x: number, y: number) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('invoices').update({ stamp_x: x, stamp_y: y }).eq('id', invoiceId).eq('user_id', user.id)
+}
+
+export async function saveWatermarkVisibility(invoiceId: string, show: boolean) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('invoices').update({ show_watermark: show }).eq('id', invoiceId).eq('user_id', user.id)
+}
