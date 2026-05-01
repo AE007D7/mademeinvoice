@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import InvoicePreview from '@/components/invoices/invoice-preview'
@@ -6,6 +7,32 @@ import { DownloadButtons } from '@/components/invoices/download-buttons'
 import { FileText } from 'lucide-react'
 
 type Params = Promise<{ token: string }>
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { token } = await params
+  const supabase = await createClient()
+  const { data: invoice } = await supabase
+    .from('invoices')
+    .select('invoice_number, id, total, currency, clients(name)')
+    .eq('share_token', token)
+    .single()
+
+  if (!invoice) return { robots: { index: false, follow: false } }
+
+  const num = invoice.invoice_number ?? invoice.id.slice(0, 8).toUpperCase()
+  const clientName = (invoice.clients as { name?: string } | null)?.name
+  const title = clientName ? `Invoice ${num} — ${clientName}` : `Invoice ${num}`
+
+  return {
+    title,
+    description: `View and download invoice ${num}${clientName ? ` for ${clientName}` : ''}.`,
+    robots: { index: false, follow: false },
+    openGraph: {
+      title,
+      type: 'website',
+    },
+  }
+}
 
 export default async function PublicInvoicePage({ params }: { params: Params }) {
   const { token } = await params

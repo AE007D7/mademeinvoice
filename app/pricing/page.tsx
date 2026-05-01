@@ -1,7 +1,14 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { Check, Zap } from 'lucide-react'
 import Link from 'next/link'
 import UpgradeButton from './UpgradeButton'
+
+export const metadata: Metadata = {
+  title: 'Pricing',
+  description: 'Made Me Invoice is free for 7 days — no credit card required. Pro is $9.99/month for unlimited invoices, custom branding, multi-currency, and global tax support.',
+  alternates: { canonical: '/pricing' },
+}
 
 const PRO_FEATURES = [
   'Unlimited invoices',

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /invoices
+Disallow: /estimations
+Disallow: /clients
+Disallow: /products
+Disallow: /settings
+Disallow: /onboarding
+
+Sitemap: https://mademeinvoice.com/sitemap.xml

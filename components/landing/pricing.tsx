@@ -9,8 +9,8 @@ const tiers = [
     period: null,
     description: 'Try it out — no credit card needed.',
     features: [
-      '1-day free trial',
-      'Full app access for 24 hours',
+      '7-day free trial, full access',
+      'Up to 5 invoices/month after trial',
       'Create & export invoices',
       'Client management',
     ],
