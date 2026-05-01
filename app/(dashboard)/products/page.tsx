@@ -27,10 +27,6 @@ export default function ProductsPage() {
   const [editForm, setEditForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    load()
-  }, [])
-
   async function load() {
     const supabase = createClient()
     const { data } = await supabase
@@ -40,6 +36,15 @@ export default function ProductsPage() {
     setProducts(data ?? [])
     setLoading(false)
   }
+
+  useEffect(() => {
+    void (async () => {
+      const supabase = createClient()
+      const { data } = await supabase.from('products').select('*').order('name')
+      setProducts(data ?? [])
+      setLoading(false)
+    })()
+  }, [])
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()

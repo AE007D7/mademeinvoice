@@ -307,7 +307,6 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
       setLoading(false)
       if (!voiceActive) textareaRef.current?.focus()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, sessionId, voiceActive])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -329,7 +328,7 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
           </div>
           <div>
             <h1 className="text-sm font-semibold text-foreground">Make Invoice with AI</h1>
-            <p className="text-xs text-muted-foreground">Describe your invoice — I'll create it instantly</p>
+            <p className="text-xs text-muted-foreground">Describe your invoice — I&apos;ll create it instantly</p>
           </div>
         </div>
       )}
@@ -344,7 +343,7 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
             <div>
               <h2 className="text-lg font-semibold text-foreground">What would you like to invoice?</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Type or speak your invoice — I'll handle the rest.
+                Type or speak your invoice — I&apos;ll handle the rest.
               </p>
             </div>
             <div className="grid w-full max-w-md gap-2 sm:grid-cols-2">

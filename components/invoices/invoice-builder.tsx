@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { SlidersHorizontal, Eye } from 'lucide-react'
 import { createInvoiceAction, updateInvoiceAction } from '@/app/actions/invoices'
 import LineItemsTable, { type LineItem } from './line-items-table'
@@ -178,7 +179,7 @@ export default function InvoiceBuilder({ invoiceId, initialValues, clients, prod
             ))}
           </select>
           <p className="text-xs text-muted-foreground">
-            <a href="/clients/new" className="underline underline-offset-2">+ Add client</a>
+            <Link href="/clients/new" className="underline underline-offset-2">+ Add client</Link>
           </p>
         </div>
         <div className="space-y-1.5">
