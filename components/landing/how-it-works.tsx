@@ -1,18 +1,18 @@
 const steps = [
   {
     number: '01',
-    title: 'Add your client and line items',
-    body: 'Enter your client\'s name and contact details, add what you delivered, and set your rate and currency. Made Me Invoice supports USD, EUR, GBP, CAD, AUD and more — plus all 50 US state tax rates and custom international rates. The whole thing takes under 60 seconds.',
+    title: 'Build your invoice — or just describe it',
+    body: 'Enter your client\'s details and line items manually, or open the AI assistant and describe your project in plain language. The AI drafts the entire invoice — items, rates, currency, and totals — in seconds. You can also use voice input: tap the mic and speak your work out loud.',
   },
   {
     number: '02',
     title: 'Customize your branding',
-    body: 'Upload your logo, choose an accent color, and pick from 10 professional invoice templates. Every invoice looks like it came from an established business — not a spreadsheet. You can also add a watermark, company stamp, and payment details like IBAN or PayPal.',
+    body: 'Upload your logo, choose an accent color, and pick from 10 professional invoice templates. Add a watermark, drag your company stamp to the right spot, and set payment details like IBAN or PayPal. Every invoice looks like it came from an established business.',
   },
   {
     number: '03',
     title: 'Send or print in one click',
-    body: 'Email the invoice directly from the app, copy a shareable link your client can open in any browser, or export a print-ready PDF. Your client receives a clean, professional document — no account required on their end. Mark it paid when the money arrives.',
+    body: 'Email the invoice directly from the app, copy a shareable link your client can open in any browser, or export a print-ready PDF. Your client gets a clean, professional document — no account required on their end. Mark it paid when the money arrives.',
   },
 ]
 

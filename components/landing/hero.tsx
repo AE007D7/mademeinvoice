@@ -113,9 +113,14 @@ export default function Hero() {
         <div className="grid items-center gap-16 lg:grid-cols-2">
           {/* Left: text */}
           <div className="space-y-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              7-day free trial · No credit card required
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                AI-powered invoicing
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm">
+                7-day free trial · No credit card
+              </div>
             </div>
 
             <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-white md:text-5xl lg:text-6xl">
@@ -125,9 +130,7 @@ export default function Hero() {
             </h1>
 
             <p className="max-w-md text-lg leading-relaxed text-white/60">
-              Create beautiful, professional invoices in seconds. Global tax
-              support, custom branding, multi-currency — everything you need
-              to run a modern freelance business.
+              Describe your project to the AI assistant and get a complete invoice in seconds — or build it manually with 10 templates, multi-currency, global tax, and custom branding.
             </p>
 
             <div className="flex flex-wrap gap-3">

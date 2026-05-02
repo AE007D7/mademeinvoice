@@ -40,7 +40,7 @@ const jsonLd = {
         'Create professional invoices online in under a minute. Made Me Invoice supports multi-currency billing, all 50 US state tax rates, custom branding with logo and watermark, 10 invoice templates, 7 invoice languages, and instant email delivery. Free 7-day trial — no credit card required.',
       screenshot: 'https://mademeinvoice.com/opengraph-image',
       featureList:
-        'Print-ready PDF invoices, Email invoice delivery, Custom branding with logo and watermark, Multi-currency support (USD EUR GBP CAD AUD), All 50 US state tax rates, Custom international tax rates, 10 professional invoice templates, 7 invoice languages, Client management, Estimate to invoice conversion, AI invoice assistant, Company stamp overlay',
+        'AI invoice assistant, Voice input with transcription, Print-ready PDF invoices, Email invoice delivery, 10 professional invoice templates, Invoices and estimates, Product catalog, Revenue analytics dashboard, Custom branding with logo watermark and stamp, Multi-currency support (USD EUR GBP CAD AUD), All 50 US state tax rates, Custom international tax rates, 7 invoice languages, Client management, Estimate to invoice conversion',
       offers: [
         {
           '@type': 'Offer',
