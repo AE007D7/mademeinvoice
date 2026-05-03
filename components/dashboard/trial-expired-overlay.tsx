@@ -36,7 +36,7 @@ export function TrialExpiredOverlay() {
             </div>
             <div>
               <p className="font-semibold text-foreground">Pro Plan</p>
-              <p className="text-xs text-muted-foreground">$9.99 / month</p>
+              <p className="text-xs text-muted-foreground">$4.99 / month</p>
             </div>
             <span className="ml-auto rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-medium text-white">
               Popular

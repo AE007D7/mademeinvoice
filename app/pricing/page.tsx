@@ -6,7 +6,7 @@ import UpgradeButton from './UpgradeButton'
 
 export const metadata: Metadata = {
   title: 'Pricing',
-  description: 'Made Me Invoice is free for 7 days — no credit card required. Pro is $9.99/month for unlimited invoices, custom branding, multi-currency, and global tax support.',
+  description: 'Made Me Invoice is free for 7 days — no credit card required. Pro is $4.99/month for unlimited invoices, custom branding, multi-currency, and global tax support.',
   alternates: { canonical: '/pricing' },
 }
 
@@ -107,7 +107,7 @@ export default async function PricingPage() {
             Upgrade to Pro
           </span>
           <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">
-            $9.99<span className="text-lg font-normal text-muted-foreground">/mo</span>
+            $4.99<span className="text-lg font-normal text-muted-foreground">/mo</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">Everything you need to grow your business.</p>
         </div>

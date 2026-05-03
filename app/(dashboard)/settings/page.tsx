@@ -104,7 +104,7 @@ export default async function SettingsPage() {
               href="/pricing"
               className="inline-flex items-center rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition-opacity"
             >
-              Upgrade to Pro — $9.99/mo
+              Upgrade to Pro — $4.99/mo
             </Link>
           </>
         )}

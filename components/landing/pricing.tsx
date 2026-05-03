@@ -10,7 +10,7 @@ const tiers = [
     description: 'Try it out — no credit card needed.',
     features: [
       '7-day free trial, full access',
-      'Up to 5 invoices/month after trial',
+      'Up to 2 invoices/month after trial',
       'Invoices & estimates',
       'Client management',
       'AI assistant (trial period)',
@@ -21,7 +21,7 @@ const tiers = [
   },
   {
     name: 'Pro',
-    price: '$9.99',
+    price: '$4.99',
     period: '/mo',
     description: 'Everything you need to grow.',
     features: [

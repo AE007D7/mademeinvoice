@@ -73,7 +73,7 @@ export default async function BillingPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">Pro</p>
-                  <p className="text-xs text-muted-foreground">$9.99 / month</p>
+                  <p className="text-xs text-muted-foreground">$4.99 / month</p>
                 </div>
                 <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-white">Popular</span>
               </div>

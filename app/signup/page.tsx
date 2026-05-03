@@ -60,7 +60,7 @@ export default function SignupPage() {
             <h1 className="text-2xl font-bold text-foreground">Check your email</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               We sent a confirmation link to <strong className="text-foreground">{email}</strong>.
-              <br />Click it to activate your 1-day free trial.
+              <br />Click it to activate your 7-day free trial.
             </p>
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function SignupPage() {
           <div className="mb-7">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Start your <span className="font-semibold text-primary">1-day free trial</span> — no credit card required
+              Start your <span className="font-semibold text-primary">7-day free trial</span> — no credit card required
             </p>
           </div>
 

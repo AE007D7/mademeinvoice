@@ -115,7 +115,7 @@ export default function AboutPage() {
               <h2 className="text-2xl font-bold text-foreground">Pricing</h2>
               <p className="leading-relaxed text-muted-foreground">
                 Made Me Invoice starts free with a 7-day full-access trial — no credit card required.
-                After the trial, the free plan gives you up to 5 invoices per month. Pro is $9.99/month
+                After the trial, the free plan gives you up to 2 invoices per month. Pro is $4.99/month
                 for unlimited invoices, custom branding, and priority support. There is no Enterprise
                 lock-in — if you outgrow Pro, contact us and we will figure something out.
               </p>

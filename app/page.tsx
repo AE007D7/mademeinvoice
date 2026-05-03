@@ -47,12 +47,12 @@ const jsonLd = {
           name: 'Free Trial',
           price: '0',
           priceCurrency: 'USD',
-          description: '7-day full-access free trial. No credit card required. Up to 5 invoices per month on the free plan after the trial.',
+          description: '7-day full-access free trial. No credit card required. Up to 2 invoices per month on the free plan after the trial.',
         },
         {
           '@type': 'Offer',
           name: 'Pro',
-          price: '9.99',
+          price: '4.99',
           priceCurrency: 'USD',
           description: 'Unlimited invoices, custom branding, global tax rates, multi-currency, priority support. Billed monthly.',
         },
@@ -130,7 +130,7 @@ const jsonLd = {
           name: 'Is Made Me Invoice free?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes — Made Me Invoice starts with a free 7-day trial that gives you full access to all features, no credit card required. After the trial, the free plan lets you create up to 5 invoices per month. The Pro plan is $9.99/month and gives you unlimited invoices, custom branding, and priority support.',
+            text: 'Yes — Made Me Invoice starts with a free 7-day trial that gives you full access to all features, no credit card required. After the trial, the free plan lets you create up to 2 invoices per month. The Pro plan is $4.99/month and gives you unlimited invoices, custom branding, and priority support.',
           },
         },
         {
