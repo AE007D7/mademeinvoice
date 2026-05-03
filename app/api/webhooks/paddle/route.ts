@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
           customData: Record<string, string> | null
           nextBilledAt: string | null
         }
-        const userId = sub.customData?.userId
+        const userId = sub.customData?.user_id
         if (!userId) break
         await supabase.from('users').update({
           plan: 'pro',
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
           customData: Record<string, string> | null
           billingPeriod: { endsAt: string } | null
         }
-        const userId = txn.customData?.userId
+        const userId = txn.customData?.user_id
         const subId = txn.subscriptionId
         const endsAt = txn.billingPeriod?.endsAt
           ? new Date(new Date(txn.billingPeriod.endsAt).getTime() + 2 * 24 * 60 * 60 * 1000).toISOString()
