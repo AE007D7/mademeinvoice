@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { cancelPayPalSubscription } from '@/lib/paypal'
 import { getStripe } from '@/lib/stripe'
+import { paddle } from '@/lib/paddle'
 import { redirect } from 'next/navigation'
 
 export async function cancelSubscriptionAction() {
@@ -12,9 +13,14 @@ export async function cancelSubscriptionAction() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('paypal_sub_id, stripe_customer_id')
+    .select('paypal_sub_id, stripe_customer_id, paddle_sub_id')
     .eq('id', user.id)
     .single()
+
+  if (userData?.paddle_sub_id) {
+    await paddle.subscriptions.cancel(userData.paddle_sub_id, { effectiveFrom: 'next_billing_period' })
+    await supabase.from('users').update({ plan: 'free', paddle_sub_id: null, subscription_ends_at: null }).eq('id', user.id)
+  }
 
   if (userData?.paypal_sub_id) {
     await cancelPayPalSubscription(userData.paypal_sub_id)

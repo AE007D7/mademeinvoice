@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { isTrialActive } from '@/lib/subscription'
 import { Check, Zap, Building2 } from 'lucide-react'
 import { PayPalSubscribeButton } from '@/components/billing/paypal-button'
-import { CancelSubscriptionButton, DeleteAccountButton, StripeCheckoutButton } from './billing-actions'
+import { PaddleCheckoutButton } from '@/components/billing/paddle-button'
+import { CancelSubscriptionButton, DeleteAccountButton } from './billing-actions'
 
 export default async function BillingPage() {
   const supabase = await createClient()
@@ -11,7 +12,7 @@ export default async function BillingPage() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('plan, trial_ends_at, paypal_sub_id, stripe_customer_id, subscription_ends_at')
+    .select('plan, trial_ends_at, paypal_sub_id, stripe_customer_id, paddle_sub_id, subscription_ends_at')
     .eq('id', user.id)
     .single()
 
@@ -23,11 +24,10 @@ export default async function BillingPage() {
   const plan = userData?.plan ?? 'free'
   const isPro = plan === 'pro' || plan === 'enterprise'
   const trialActive = isTrialActive(userData?.trial_ends_at ?? null)
-  const hasSub = !!(userData?.paypal_sub_id || userData?.stripe_customer_id)
+  const hasSub = !!(userData?.paypal_sub_id || userData?.stripe_customer_id || userData?.paddle_sub_id)
 
   const paypalPlanId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_PRO_MONTHLY ?? ''
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? ''
-  const stripePricePro = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO ?? ''
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -85,19 +85,17 @@ export default async function BillingPage() {
                   </li>
                 ))}
               </ul>
-              <div className="space-y-2 pt-2">
-                {stripePricePro && (
-                  <StripeCheckoutButton
-                    label="Subscribe with Card"
-                    priceId={stripePricePro}
-                    mode="subscription"
-                  />
-                )}
+              <div className="space-y-3 pt-2">
+                <PaddleCheckoutButton userId={user.id} userEmail={user.email ?? ''} />
                 {paypalPlanId && paypalClientId && (
-                  <PayPalSubscribeButton planId={paypalPlanId} clientId={paypalClientId} />
-                )}
-                {!stripePricePro && (!paypalPlanId || !paypalClientId) && (
-                  <p className="text-xs text-muted-foreground">Payment not configured yet.</p>
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="h-px flex-1 bg-border" />
+                      <span className="text-xs text-muted-foreground">or</span>
+                      <span className="h-px flex-1 bg-border" />
+                    </div>
+                    <PayPalSubscribeButton planId={paypalPlanId} clientId={paypalClientId} />
+                  </>
                 )}
               </div>
             </div>

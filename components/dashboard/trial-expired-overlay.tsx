@@ -2,6 +2,7 @@
 
 import { Zap, Lock } from 'lucide-react'
 import { PayPalSubscribeButton } from '@/components/billing/paypal-button'
+import { PaddleCheckoutButton } from '@/components/billing/paddle-button'
 
 const paypalPlanId  = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_PRO_MONTHLY ?? ''
 const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? ''
@@ -61,16 +62,17 @@ export function TrialExpiredOverlay() {
 
         {/* Payment options */}
         <div className="space-y-3">
-          {/* PayPal */}
+          <PaddleCheckoutButton />
           {paypalPlanId && paypalClientId && (
-            <div>
-              <p className="mb-2 text-center text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Pay with PayPal
-              </p>
+            <>
+              <div className="flex items-center gap-2">
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">or</span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
               <PayPalSubscribeButton planId={paypalPlanId} clientId={paypalClientId} />
-            </div>
+            </>
           )}
-
         </div>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
