@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { Check, Zap } from 'lucide-react'
 import Link from 'next/link'
-import UpgradeButton from './UpgradeButton'
+import { PaddleCheckoutButton } from '@/components/billing/paddle-button'
 
 export const metadata: Metadata = {
   title: 'Pricing',
@@ -35,11 +35,6 @@ export default async function PricingPage() {
   }
 
   const isPro = plan === 'pro' || plan === 'enterprise'
-  const manageUrl = process.env.PAYPAL_MODE === 'live'
-    ? 'https://www.paypal.com/myaccount/autopay/'
-    : 'https://www.sandbox.paypal.com/myaccount/autopay/'
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? ''
-  const paypalPlanId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_PRO_MONTHLY ?? ''
 
   if (isPro) {
     return (
@@ -80,14 +75,12 @@ export default async function PricingPage() {
             >
               Go to dashboard
             </Link>
-            <a
-              href={manageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/billing"
               className="flex-1 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-center text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
             >
               Manage subscription
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -124,7 +117,7 @@ export default async function PricingPage() {
             ))}
           </ul>
 
-          <UpgradeButton clientId={paypalClientId} planId={paypalPlanId} />
+          <PaddleCheckoutButton userId={user?.id ?? ''} userEmail={user?.email ?? ''} />
 
           {!user && (
             <p className="text-center text-xs text-muted-foreground">

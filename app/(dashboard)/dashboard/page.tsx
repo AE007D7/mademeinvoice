@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DollarSign, Clock, Users, FileText, AlertTriangle } from 'lucide-react'
 import { formatDate } from '@/lib/format-date'
+import { UpgradedBanner } from '@/components/dashboard/upgrade-banner'
 
 const STATUS_BADGE: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -46,6 +47,9 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-foreground">{t.dashboard.title}</h1>
         <Button render={<Link href="/invoices/new" />}>{t.invoices.newInvoice}</Button>
       </div>
+
+      {/* Upgrade success banner (polls until plan=pro confirmed) */}
+      <UpgradedBanner />
 
       {/* Trial banner */}
       {userData?.plan === 'free' && trialActive && (

@@ -1,10 +1,40 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { cancelPayPalSubscription } from '@/lib/paypal'
 import { getStripe } from '@/lib/stripe'
 import { paddle } from '@/lib/paddle'
 import { redirect } from 'next/navigation'
+
+export async function checkPlanAction(): Promise<string> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 'free'
+  const { data } = await supabase.from('users').select('plan').eq('id', user.id).single()
+  return data?.plan ?? 'free'
+}
+
+export async function getPaddlePortalAction(): Promise<string | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data } = await supabase
+    .from('users')
+    .select('paddle_customer_id')
+    .eq('id', user.id)
+    .single()
+
+  const customerId = data?.paddle_customer_id
+  if (!customerId) return null
+
+  try {
+    const response = await paddle.customers.generateAuthToken(customerId)
+    return `https://customer.paddle.com?auth_token=${response.customerAuthToken}`
+  } catch (err) {
+    console.error('[Paddle] generateAuthToken failed:', err)
+    return null
+  }
+}
 
 export async function cancelSubscriptionAction() {
   const supabase = await createClient()
@@ -13,18 +43,14 @@ export async function cancelSubscriptionAction() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('paypal_sub_id, stripe_customer_id, paddle_sub_id')
+    .select('paddle_sub_id, stripe_customer_id')
     .eq('id', user.id)
     .single()
 
   if (userData?.paddle_sub_id) {
     await paddle.subscriptions.cancel(userData.paddle_sub_id, { effectiveFrom: 'next_billing_period' })
-    await supabase.from('users').update({ plan: 'free', paddle_sub_id: null, subscription_ends_at: null }).eq('id', user.id)
-  }
-
-  if (userData?.paypal_sub_id) {
-    await cancelPayPalSubscription(userData.paypal_sub_id)
-    await supabase.from('users').update({ plan: 'free', paypal_sub_id: null, subscription_ends_at: null }).eq('id', user.id)
+    // Don't downgrade to free here — the webhook will set subscription_status=canceled
+    // and the user retains Pro access until subscription_ends_at
   }
 
   if (userData?.stripe_customer_id) {
@@ -45,13 +71,12 @@ export async function deleteAccountAction() {
 
   const { data: userData } = await supabase
     .from('users')
-    .select('paypal_sub_id, stripe_customer_id')
+    .select('paddle_sub_id, stripe_customer_id')
     .eq('id', user.id)
     .single()
 
-  // Cancel active subscriptions
-  if (userData?.paypal_sub_id) {
-    await cancelPayPalSubscription(userData.paypal_sub_id).catch(() => null)
+  if (userData?.paddle_sub_id) {
+    await paddle.subscriptions.cancel(userData.paddle_sub_id, { effectiveFrom: 'immediately' }).catch(() => null)
   }
   if (userData?.stripe_customer_id) {
     const subs = await getStripe().subscriptions.list({ customer: userData.stripe_customer_id, status: 'active', limit: 1 })
@@ -60,7 +85,6 @@ export async function deleteAccountAction() {
     }
   }
 
-  // Delete storage files
   const { data: brandingData } = await supabase
     .from('branding')
     .select('logo_url, watermark_url')
@@ -74,7 +98,6 @@ export async function deleteAccountAction() {
     await supabase.storage.from('watermarks').remove([brandingData.watermark_url]).catch(() => null)
   }
 
-  // Delete user record (cascades to all related rows)
   await supabase.from('users').delete().eq('id', user.id)
   await supabase.auth.signOut()
 
