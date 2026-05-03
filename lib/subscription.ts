@@ -35,13 +35,13 @@ export async function checkInvoiceLimit(
     .eq('user_id', userId)
     .gte('created_at', startOfMonth.toISOString())
 
-  if ((count ?? 0) < 5) {
+  if ((count ?? 0) < 2) {
     return { allowed: true }
   }
 
   return {
     allowed: false,
     reason:
-      'You have reached the 5 invoice limit for the free plan this month. Upgrade to Pro for unlimited invoices.',
+      'You have reached the 2 invoice limit for the free plan this month. Upgrade to Pro for unlimited invoices.',
   }
 }
