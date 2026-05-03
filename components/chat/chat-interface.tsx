@@ -4,8 +4,6 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Send, Loader2, ExternalLink, ChevronDown, ChevronRight, Bot, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { VoiceRecorder } from '@/components/ai-chat/VoiceRecorder'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -180,8 +178,6 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
   const [input, setInput] = useState('')
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [voiceActive, setVoiceActive] = useState(false)
-  const [voiceError, setVoiceError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -305,9 +301,9 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
       })
     } finally {
       setLoading(false)
-      if (!voiceActive) textareaRef.current?.focus()
+      textareaRef.current?.focus()
     }
-  }, [loading, sessionId, voiceActive])
+  }, [loading, sessionId])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -343,7 +339,7 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
             <div>
               <h2 className="text-lg font-semibold text-foreground">What would you like to invoice?</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Type or speak your invoice — I&apos;ll handle the rest.
+                Type your invoice — I&apos;ll handle the rest.
               </p>
             </div>
             <div className="grid w-full max-w-md gap-2 sm:grid-cols-2">
@@ -372,60 +368,36 @@ export default function ChatInterface({ compact = false }: { compact?: boolean }
       {/* Input */}
       <div className="border-t border-border bg-background px-4 py-4 sm:px-6">
         <div className="mx-auto max-w-2xl">
-          <div className={cn(
-            'flex items-end gap-2 rounded-2xl border bg-card px-4 py-3 shadow-sm transition-colors',
-            voiceActive
-              ? 'border-primary/50 ring-1 ring-primary/20'
-              : 'border-border focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20'
-          )}>
-            <VoiceRecorder
-              onTranscript={(text) => { setInput(text); setVoiceError(null) }}
-              onSend={send}
-              onActiveChange={setVoiceActive}
-              onError={setVoiceError}
+          <div className="flex items-end gap-2 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm transition-colors focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Invoice Acme $500 for design work…"
+              rows={1}
               disabled={loading}
+              className="min-h-[24px] max-h-32 flex-1 resize-none overflow-y-auto bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              style={{ height: 'auto' }}
+              onInput={(e) => {
+                const t = e.currentTarget
+                t.style.height = 'auto'
+                t.style.height = `${t.scrollHeight}px`
+              }}
             />
-
-            {!voiceActive && (
-              <>
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Invoice Acme $500 for design work…"
-                  rows={1}
-                  disabled={loading}
-                  className="min-h-[24px] max-h-32 flex-1 resize-none overflow-y-auto bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                  style={{ height: 'auto' }}
-                  onInput={(e) => {
-                    const t = e.currentTarget
-                    t.style.height = 'auto'
-                    t.style.height = `${t.scrollHeight}px`
-                  }}
-                />
-                <Button
-                  type="button"
-                  size="icon-sm"
-                  onClick={() => send(input)}
-                  disabled={loading || !input.trim()}
-                  className="shrink-0 gradient-primary text-white hover:opacity-90 disabled:opacity-40"
-                >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
-              </>
-            )}
+            <Button
+              type="button"
+              size="icon-sm"
+              onClick={() => send(input)}
+              disabled={loading || !input.trim()}
+              className="shrink-0 gradient-primary text-white hover:opacity-90 disabled:opacity-40"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </Button>
           </div>
 
-          {voiceError && (
-            <p className="mt-1.5 text-center text-[10px] text-red-500">{voiceError}</p>
-          )}
           <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
-            {voiceActive ? (
-              <span className="text-primary">Recording… tap stop when done</span>
-            ) : (
-              'Enter to send · Shift+Enter for new line · Mic for voice'
-            )}
+            Enter to send · Shift+Enter for new line
           </p>
         </div>
       </div>

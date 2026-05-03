@@ -4,7 +4,6 @@ import {
   Globe,
   DollarSign,
   Palette,
-  Mic,
   LayoutTemplate,
   ClipboardList,
   Languages,
@@ -20,14 +19,6 @@ const features = [
     description:
       'Describe your project in plain language and the AI builds the entire invoice — line items, rates, and totals — instantly. No forms to fill.',
     color: 'bg-violet-600',
-    highlight: true,
-  },
-  {
-    icon: Mic,
-    title: 'Voice Input',
-    description:
-      'Tap the mic and describe your work out loud. Your voice is transcribed and turned into a complete invoice draft in seconds.',
-    color: 'bg-indigo-500',
     highlight: true,
   },
   {
